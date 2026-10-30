@@ -21,7 +21,30 @@ from backend.app.agents.guardian.config import (
 from backend.app.agents.guardian.schemas import RiskSignal
 from backend.app.agents.target.schemas import StepResult, ToolCallProposal
 from backend.app.security.actors import MockActor
+from backend.app.security.intent_rules import is_action_explicitly_denied
 from backend.app.tools.filesystem.service import sanitize_virtual_path
+
+
+def detect_user_forbidden_action(
+    instruction: str,
+    proposal: ToolCallProposal,
+) -> Optional[RiskSignal]:
+    """SIGNAL-00: Fires when proposed tool action violates explicit negative constraints in user instruction."""
+    denied, reason = is_action_explicitly_denied(
+        instruction=instruction,
+        tool=proposal.tool,
+        action=proposal.action,
+        parameters=proposal.parameters,
+    )
+    if denied:
+        sig_id = "USER_FORBIDDEN_ACTION"
+        return RiskSignal(
+            signal_id=sig_id,
+            description=f"Action explicitly forbidden by user prompt: {reason}",
+            weight=SIGNAL_WEIGHTS[sig_id],
+            severity=SIGNAL_SEVERITIES[sig_id],
+        )
+    return None
 
 
 def detect_intent_mismatch(
@@ -216,3 +239,4 @@ def detect_write_after_browse(
                 severity=SIGNAL_SEVERITIES[sig_id],
             )
     return None
+

@@ -7,6 +7,7 @@ from backend.app.agents.target.config import AVAILABLE_TOOLS, PROHIBITED_AUTONOM
 from backend.app.agents.target.schemas import ToolCallProposal
 from backend.app.core.logging import get_logger
 from backend.app.security.actors import MockActor
+from backend.app.security.intent_rules import is_action_explicitly_denied
 from backend.app.tools.filesystem.service import sanitize_virtual_path
 
 logger = get_logger("agentshield.agents.target.policy")
@@ -24,10 +25,28 @@ class PolicyValidator:
     """Central deterministic policy inspection layer for Target Agent tool calls."""
 
     @classmethod
-    def validate_proposal(cls, actor: MockActor, proposal: ToolCallProposal) -> PolicyValidationResult:
+    def validate_proposal(
+        cls,
+        actor: MockActor,
+        proposal: ToolCallProposal,
+        instruction: Optional[str] = None,
+    ) -> PolicyValidationResult:
         tool = proposal.tool.lower().strip()
         action = proposal.action.lower().strip()
         action_key = f"{tool}:{action}"
+
+        # 0. User Negative Constraint Verification (Enforce User-Denied Actions)
+        if instruction:
+            denied, reason = is_action_explicitly_denied(
+                instruction=instruction,
+                tool=tool,
+                action=action,
+                parameters=proposal.parameters,
+            )
+            if denied:
+                msg = f"Security Policy Violation: {reason}"
+                logger.warning("POLICY BLOCK (USER FORBIDDEN): %s for actor %s", msg, actor.actor_id)
+                return PolicyValidationResult(is_allowed=False, reason=msg)
 
         # 1. Prohibited Autonomous Action Boundary
         # Autonomous agents can NEVER authorize payments or execute arbitrary system commands

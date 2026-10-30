@@ -1,4 +1,3 @@
-
 """Deterministic mock LLM planner for offline testing and local development."""
 
 import re
@@ -6,6 +5,7 @@ from typing import Any, Dict, List, Optional
 from backend.app.agents.target.llm.base import BaseLLMProvider
 from backend.app.agents.target.schemas import StepResult, ToolCallProposal
 from backend.app.core.logging import get_logger
+from backend.app.security.intent_rules import is_action_explicitly_denied
 
 logger = get_logger("agentshield.agents.target.mock_planner")
 
@@ -46,9 +46,17 @@ class DeterministicMockPlanner(BaseLLMProvider):
                 )
             return proposals
 
+        # Pre-check explicit negative user constraints
+        send_denied, _ = is_action_explicitly_denied(instruction, "email", "send_email", {})
+        payments_denied, _ = is_action_explicitly_denied(instruction, "payments", "create_payment_request", {})
+        write_denied, _ = is_action_explicitly_denied(instruction, "filesystem", "write_file", {})
+
+        # Positive send intent requires affirmative request without user negation
+        has_positive_send = ("send" in text or "compose" in text or "dispatch" in text) and not send_denied
+
         # 1. Email actions
         if "email" in text or "inbox" in text or "mail" in text or "message" in text:
-            if "send" in text:
+            if has_positive_send and not ("read" in text and "inbox" in text and "to " not in text):
                 recipient = "compliance@agentshield.test"
                 rec_match = re.search(r"to\s+([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", instruction)
                 if rec_match:
@@ -72,7 +80,7 @@ class DeterministicMockPlanner(BaseLLMProvider):
                         parameters={"folder": "inbox"},
                     )
                 )
-                if "read" in text or "check" in text:
+                if "read" in text or "check" in text or "summarize" in text or "summary" in text:
                     # Check if a specific ID was mentioned
                     id_match = re.search(r"(msg-[a-z0-9-]+)", text)
                     msg_id = id_match.group(1) if id_match else "msg-safe-001"
@@ -116,7 +124,7 @@ class DeterministicMockPlanner(BaseLLMProvider):
                     )
 
             # --- Write step (evaluated independently of read) ---
-            if "write" in text or "save" in text or "create file" in text:
+            if ("write" in text or "save" in text or "create file" in text) and not write_denied:
                 target_path = "sandbox/task_summary.txt"
                 # Strip trailing punctuation from captured path
                 path_match = re.search(
@@ -154,7 +162,7 @@ class DeterministicMockPlanner(BaseLLMProvider):
             )
 
         # 4. Payment actions
-        if "payment" in text or "invoice" in text or "wire" in text or "usd" in text:
+        if ("payment" in text or "invoice" in text or "wire" in text or "usd" in text) and not payments_denied:
             if "authorize" in text or "approve" in text or "execute" in text:
                 # Propose payment authorization (which PolicyValidator must intercept and BLOCK)
                 tx_match = re.search(r"(tx-[a-z0-9-]+)", text)
@@ -187,7 +195,7 @@ class DeterministicMockPlanner(BaseLLMProvider):
                         },
                     )
                 )
-            else:
+            elif "list" in text or "view" in text or "check" in text or "inspect" in text:
                 proposals.append(
                     ToolCallProposal(
                         tool="payments",
@@ -217,12 +225,13 @@ class DeterministicMockPlanner(BaseLLMProvider):
         """Synthesize step results into an objective task summary."""
         total = len(steps)
         successful = sum(1 for s in steps if s.status == "SUCCESS")
-        blocked = sum(1 for s in steps if s.status == "BLOCKED")
+        blocked = sum(1 for s in steps if s.status in ("BLOCKED", "GUARDIAN_BLOCKED"))
+        pending = sum(1 for s in steps if s.status == "PENDING_APPROVAL")
         errors = sum(1 for s in steps if s.status == "ERROR")
 
         lines = [
             f"### Task Summary: '{instruction}'",
-            f"- **Steps executed**: {total} (Success: {successful}, Blocked: {blocked}, Errors: {errors})",
+            f"- **Steps executed**: {total} (Success: {successful}, Blocked: {blocked}, Pending Approval: {pending}, Errors: {errors})",
             "",
             "**Action Breakdown:**",
         ]
@@ -231,8 +240,10 @@ class DeterministicMockPlanner(BaseLLMProvider):
             status_badge = f"[{s.status}]"
             if s.status == "SUCCESS":
                 lines.append(f"- {status_badge} `{s.tool}:{s.action}` -> Executed successfully.")
-            elif s.status == "BLOCKED":
+            elif s.status in ("BLOCKED", "GUARDIAN_BLOCKED"):
                 lines.append(f"- {status_badge} `{s.tool}:{s.action}` -> Blocked by security policy: {s.policy_reason}")
+            elif s.status == "PENDING_APPROVAL":
+                lines.append(f"- {status_badge} `{s.tool}:{s.action}` -> Held for human approval: {s.policy_reason}")
             else:
                 lines.append(f"- {status_badge} `{s.tool}:{s.action}` -> Failed with error: {s.error}")
 
@@ -240,4 +251,3 @@ class DeterministicMockPlanner(BaseLLMProvider):
             lines.append("\n> [!NOTE]\n> One or more actions were blocked in adherence to security boundaries.")
 
         return "\n".join(lines)
-

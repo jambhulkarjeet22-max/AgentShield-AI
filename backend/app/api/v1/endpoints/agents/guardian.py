@@ -133,3 +133,4 @@ def decide_approval(
     if not appr:
         raise NotFoundError(f"Approval request '{approval_id}' not found")
     return appr
+

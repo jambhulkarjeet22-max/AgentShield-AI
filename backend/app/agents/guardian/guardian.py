@@ -95,3 +95,4 @@ class BlueTeamGuardian:
             proposal=proposal,
             verdict=verdict,
         )
+

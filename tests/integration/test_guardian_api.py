@@ -188,3 +188,4 @@ class TestTargetAgentGuardianInterception:
         resp = client.get(f"{BASE}/decisions", headers=analyst_headers)
         assert resp.status_code == 200
         assert resp.json()["total"] >= 1
+

@@ -24,6 +24,7 @@ from backend.app.agents.guardian.signals import (
     detect_sensitivity_violation,
     detect_step_velocity_anomaly,
     detect_unknown_recipient,
+    detect_user_forbidden_action,
     detect_write_after_browse,
 )
 from backend.app.agents.target.schemas import StepResult, ToolCallProposal
@@ -50,6 +51,11 @@ class RiskScorer:
 
         # 2. Collect Risk Signals
         triggered_signals: List[RiskSignal] = []
+
+        # SIGNAL-00: Explicit user negative constraints (Action strictly forbidden by user)
+        sig = detect_user_forbidden_action(instruction, proposal)
+        if sig:
+            triggered_signals.append(sig)
 
         sig = detect_intent_mismatch(instruction, proposal, intent_score)
         if sig:
@@ -88,7 +94,11 @@ class RiskScorer:
         risk_score = min(100.0, max(0.0, round(raw_score, 1)))
 
         # 4. Determine Verdict
-        if risk_score >= BLOCK_THRESHOLD:
+        if any(s.signal_id == "USER_FORBIDDEN_ACTION" for s in triggered_signals):
+            # User explicitly forbade this action: strict mandatory BLOCK. Cannot be approved.
+            verdict = GuardianDecision.BLOCK
+            risk_score = 100.0
+        elif risk_score >= BLOCK_THRESHOLD:
             verdict = GuardianDecision.BLOCK
         elif risk_score >= ALLOW_THRESHOLD:
             verdict = GuardianDecision.REQUIRE_APPROVAL
@@ -124,3 +134,4 @@ class RiskScorer:
             explanation=explanation,
             intent_alignment=intent_score,
         )
+

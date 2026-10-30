@@ -88,7 +88,7 @@ class TargetAgentOrchestrator:
                 break
 
             # 1. Pre-execution Security Policy Inspection
-            policy_check = PolicyValidator.validate_proposal(actor, proposal)
+            policy_check = PolicyValidator.validate_proposal(actor, proposal, instruction=request.instruction)
             if not policy_check.is_allowed:
                 blocked_count += 1
                 step_res = StepResult(

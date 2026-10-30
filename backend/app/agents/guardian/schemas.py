@@ -112,3 +112,4 @@ class ApprovalListResponse(BaseModel):
 
     total: int = Field(description="Total approval count")
     approvals: List[ApprovalRequest] = Field(description="List of approval requests")
+

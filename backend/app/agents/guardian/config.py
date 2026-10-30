@@ -13,6 +13,7 @@ BLOCK_THRESHOLD: float = 80.0
 # ── Signal weights ────────────────────────────────────────────────────────────
 # Scores are additive, capped at 100.0.
 SIGNAL_WEIGHTS: Dict[str, float] = {
+    "USER_FORBIDDEN_ACTION":  100.0,
     "INTENT_MISMATCH":        25.0,
     "SENSITIVITY_VIOLATION":  35.0,
     "UNKNOWN_RECIPIENT":      20.0,
@@ -24,6 +25,7 @@ SIGNAL_WEIGHTS: Dict[str, float] = {
 }
 
 SIGNAL_SEVERITIES: Dict[str, str] = {
+    "USER_FORBIDDEN_ACTION":  "CRITICAL",
     "INTENT_MISMATCH":        "HIGH",
     "SENSITIVITY_VIOLATION":  "CRITICAL",
     "UNKNOWN_RECIPIENT":      "MEDIUM",
