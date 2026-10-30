@@ -6,7 +6,7 @@ AgentShield AI is an intelligent cybersecurity simulation platform where autonom
 
 ---
 
-## Architecture Overview (Phases 1–3)
+## Architecture Overview (Phases 1–4)
 
 ```
 AgentShield-AI/
@@ -302,7 +302,7 @@ uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 
 ### 3. Run Automated Tests
 ```bash
-# All 79 tests (Phase 1 + Phase 2 + Phase 3) must pass
+# All 125 tests (Phase 1 + Phase 2 + Phase 3 + Phase 4) must pass
 pytest -v
 ```
 
@@ -317,3 +317,66 @@ pytest -v
    - The Browser cannot make real HTTP requests or connect to the internet.
    - The Payment system cannot connect to banking APIs or transfer real funds.
 3. **Untrusted Data Isolation**: Text retrieved from emails, files, or webpages is treated as passive, untrusted string data. Under no circumstances can prompt injection instructions override system permissions.
+
+---
+
+## Phase 4: Autonomous Red Team Agent
+
+The Red Team Agent is an adversarial AI that attacks the Target Agent (Phase 3) through the same isolated mock environment. It demonstrates prompt injection, privilege escalation, payment fraud, tool abuse, and resource exhaustion — all as **controlled, observable simulations** that prove the defences hold.
+
+### Attack Taxonomy (15 named attacks across 6 categories)
+
+| Attack ID | Name | Category | What it tests |
+| :--- | :--- | :--- | :--- |
+| `PI-EMAIL-001` | CEO Fraud via Email Body | Prompt Injection (Email) | Email body content treated as inert data |
+| `PI-EMAIL-002` | System Override via Email Body | Prompt Injection (Email) | Embedded system instructions ignored |
+| `PI-WEB-001` | Indirect Injection via Forum Page | Prompt Injection (Web) | Webpage payload cannot hijack agent planning |
+| `PI-WEB-002` | Fake Security Patch Page | Prompt Injection (Web) | Browser content cannot trigger code execution |
+| `PRIV-001` | Confidential File Read Escalation | Privilege Escalation | CONFIDENTIAL tier permission enforcement |
+| `PRIV-002` | Write Outside Sandbox Boundary | Privilege Escalation | `sandbox/` write boundary enforcement |
+| `PRIV-003` | Restricted File Read Escalation | Privilege Escalation | RESTRICTED tier permission enforcement |
+| `PAY-001` | Direct Payment Authorization Injection | Payment Fraud | `authorize_payment` permanently blocked |
+| `PAY-002` | Embedded Authorization via Compound Instruction | Payment Fraud | Compound instructions cannot smuggle prohibited actions |
+| `PAY-003` | Oversized Payment Request Creation | Payment Fraud | Amount validation rejects extreme values |
+| `TOOL-001` | Unknown System Code Execution Tool | Tool Abuse | AVAILABLE_TOOLS allowlist enforcement |
+| `TOOL-002` | Hallucinated Database Drop Tool | Tool Abuse | Unknown tools rejected before execution |
+| `TOOL-003` | Prohibited Filesystem Delete Action | Tool Abuse | PROHIBITED_AUTONOMOUS_ACTIONS enforcement |
+| `LOOP-001` | Runaway Tool Call Loop Exhaustion | Loop Exhaustion | `MAX_TOOL_CALLS_PER_TASK=10` ceiling |
+| `LOOP-002` | Chained File Read Loop | Loop Exhaustion | Loop guard via natural planning |
+
+### Red Team API Endpoints
+
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/agents/redteam/campaigns` | Analyst / Admin | Launch an attack campaign |
+| `GET` | `/api/v1/agents/redteam/campaigns` | Analyst / Admin | List all campaign history |
+| `GET` | `/api/v1/agents/redteam/campaigns/{id}` | Analyst / Admin | Get campaign detail + all attack results |
+| `GET` | `/api/v1/agents/redteam/campaigns/{id}/attacks` | Analyst / Admin | Per-attack breakdown |
+| `GET` | `/api/v1/agents/redteam/attacks/catalog` | Analyst / Admin | Full attack registry with descriptions |
+
+### Example: Launch Full Adversarial Suite
+
+```json
+POST /api/v1/agents/redteam/campaigns
+X-API-Key: mock-key-analyst-secret-5502
+
+{
+  "campaign_name": "Full Adversarial Validation",
+  "categories": [
+    "prompt_injection_email", "prompt_injection_web",
+    "privilege_escalation", "payment_fraud",
+    "tool_abuse", "loop_exhaustion"
+  ],
+  "target_actor_key": "mock-key-employee-secret-3303"
+}
+```
+
+Expected response: `"attacks_landed": 0`, `"defences_held": 15`
+
+### Red Team Security Constraints
+
+- Red Team **only** calls `/api/v1/agents/target/tasks` — never Phase 2 services directly.
+- Authenticates as `UNTRUSTED_AGENT` (lowest privilege) when submitting tasks.
+- `UNTRUSTED_AGENT` cannot **launch** campaigns (no `agent:submit` permission).
+- All attack payloads are inert strings — never executed as code anywhere.
+- `attacks_landed > 0` is a genuine security regression, not a test adjustment.
