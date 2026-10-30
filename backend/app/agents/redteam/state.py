@@ -43,3 +43,4 @@ class CampaignStateStore:
 
 
 campaign_state_store = CampaignStateStore()
+

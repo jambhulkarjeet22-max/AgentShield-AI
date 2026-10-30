@@ -20,6 +20,21 @@ from backend.app.agents.redteam import (
     CampaignStatus,
     campaign_state_store,
 )
+from backend.app.agents.guardian import (
+    ApprovalDecision,
+    ApprovalListResponse,
+    ApprovalRequest,
+    ApprovalStatus,
+    BlueTeamGuardian,
+    GuardianDecision,
+    GuardianDecisionListResponse,
+    GuardianDecisionRecord,
+    GuardianVerdict,
+    RiskScorer,
+    RiskSignal,
+    approval_store,
+    guardian_decision_store,
+)
 
 __all__ = [
     # Target Agent (Phase 3)
@@ -40,4 +55,18 @@ __all__ = [
     "CampaignStatus",
     "CampaignListResponse",
     "campaign_state_store",
+    # Blue Team Guardian (Phase 5)
+    "BlueTeamGuardian",
+    "GuardianDecision",
+    "GuardianVerdict",
+    "RiskSignal",
+    "RiskScorer",
+    "ApprovalRequest",
+    "ApprovalStatus",
+    "ApprovalDecision",
+    "ApprovalListResponse",
+    "GuardianDecisionRecord",
+    "GuardianDecisionListResponse",
+    "approval_store",
+    "guardian_decision_store",
 ]

@@ -96,3 +96,4 @@ class AttackDispatcher:
             "body": response.json() if response.status_code < 400 else {},
             "raw_text": response.text,
         }
+

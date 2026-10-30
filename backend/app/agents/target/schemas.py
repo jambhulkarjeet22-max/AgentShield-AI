@@ -16,6 +16,7 @@ class TaskStatus(str, Enum):
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     BLOCKED = "BLOCKED"
+    AWAITING_APPROVAL = "AWAITING_APPROVAL"
 
 
 class ToolCallProposal(BaseModel):
@@ -39,9 +40,13 @@ class StepResult(BaseModel):
     parameters: Dict[str, Any] = Field(description="Input arguments provided to tool")
     policy_allowed: bool = Field(description="Whether policy guardrails permitted execution")
     policy_reason: Optional[str] = Field(default=None, description="Explanation if blocked by policy")
-    status: str = Field(description="Step status: SUCCESS, BLOCKED, or ERROR")
+    status: str = Field(description="Step status: SUCCESS, BLOCKED, GUARDIAN_BLOCKED, PENDING_APPROVAL, or ERROR")
     output: Optional[Any] = Field(default=None, description="Inert data returned by tool service")
     error: Optional[str] = Field(default=None, description="Error message if step failed")
+    guardian_verdict: Optional[Any] = Field(
+        default=None,
+        description="Blue Team Guardian risk verdict (Phase 5+)",
+    )
 
 
 class TaskSubmissionRequest(BaseModel):

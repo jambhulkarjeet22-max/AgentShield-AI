@@ -102,3 +102,4 @@ class AttackPlanner:
     def total_attack_count(cls) -> int:
         """Return the total number of registered attacks."""
         return len(_ATTACK_REGISTRY)
+

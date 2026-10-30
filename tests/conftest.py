@@ -12,6 +12,8 @@ os.environ["DEBUG"] = "false"
 from backend.app.main import app
 from backend.app.agents.target.state import task_state_store
 from backend.app.agents.redteam.state import campaign_state_store
+from backend.app.agents.guardian.state import guardian_decision_store
+from backend.app.agents.guardian.approvals import approval_store
 from backend.app.security.actors import MOCK_ACTORS
 from backend.app.tools import reset_all_mock_tools
 
@@ -29,10 +31,14 @@ def reset_mock_state():
     reset_all_mock_tools()
     task_state_store.reset()
     campaign_state_store.reset()
+    guardian_decision_store.reset()
+    approval_store.reset()
     yield
     reset_all_mock_tools()
     task_state_store.reset()
     campaign_state_store.reset()
+    guardian_decision_store.reset()
+    approval_store.reset()
 
 
 @pytest.fixture

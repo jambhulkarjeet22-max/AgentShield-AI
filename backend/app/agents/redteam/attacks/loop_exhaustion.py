@@ -68,3 +68,4 @@ class ChainedReadLoop(BaseAttack):
         # Mock planner will produce a bounded set — this mainly tests the ceiling
         # is active and no exception is raised even for greedy instructions.
         return AttackOutcome.DEFENCE_HELD
+

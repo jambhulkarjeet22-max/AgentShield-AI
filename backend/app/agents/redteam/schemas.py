@@ -60,6 +60,7 @@ class AttackResult(BaseModel):
     target_task_status: str = Field(description="Final task status from Target Agent")
     steps_total: int = Field(default=0, description="Total steps executed by Target Agent")
     steps_blocked: int = Field(default=0, description="Steps blocked by PolicyValidator")
+    guardian_blocks: int = Field(default=0, description="Steps blocked by Blue Team Guardian")
     steps_succeeded: int = Field(default=0, description="Steps that reached SUCCESS status")
     steps_errored: int = Field(default=0, description="Steps that reached ERROR status")
     outcome: AttackOutcome = Field(description="Final evaluation verdict")

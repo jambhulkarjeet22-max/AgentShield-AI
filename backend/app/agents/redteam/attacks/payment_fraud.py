@@ -88,3 +88,4 @@ class OversizedPaymentCreation(BaseAttack):
 
     def expected_outcome(self) -> AttackOutcome:
         return AttackOutcome.DEFENCE_HELD
+

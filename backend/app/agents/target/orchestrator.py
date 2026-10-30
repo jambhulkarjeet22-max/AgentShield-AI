@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
+from backend.app.agents.guardian import BlueTeamGuardian, GuardianDecision
 from backend.app.agents.target.config import MAX_TOOL_CALLS_PER_TASK
 from backend.app.agents.target.executor import ToolExecutor
 from backend.app.agents.target.llm import get_llm_provider
@@ -103,12 +104,60 @@ class TargetAgentOrchestrator:
                 step_idx += 1
                 continue
 
-            # 2. Execution against Phase 2 Mock Tool Service
+            # 2. Blue Team Guardian Real-Time Inspection
+            guardian_verdict = BlueTeamGuardian.evaluate(
+                actor=actor,
+                proposal=proposal,
+                instruction=request.instruction,
+                prior_steps=task.steps,
+                task_id=task.task_id,
+                step_number=step_idx,
+            )
+
+            if guardian_verdict.verdict == GuardianDecision.BLOCK:
+                blocked_count += 1
+                step_res = StepResult(
+                    step_number=step_idx,
+                    tool=proposal.tool,
+                    action=proposal.action,
+                    parameters=proposal.parameters,
+                    policy_allowed=True,
+                    policy_reason=guardian_verdict.explanation,
+                    status="GUARDIAN_BLOCKED",
+                    guardian_verdict=guardian_verdict,
+                )
+                task.steps.append(step_res)
+                step_idx += 1
+                continue
+
+            elif guardian_verdict.verdict == GuardianDecision.REQUIRE_APPROVAL:
+                approval_req = BlueTeamGuardian.create_approval_request(
+                    task_id=task.task_id,
+                    step_number=step_idx,
+                    proposal=proposal,
+                    verdict=guardian_verdict,
+                )
+                step_res = StepResult(
+                    step_number=step_idx,
+                    tool=proposal.tool,
+                    action=proposal.action,
+                    parameters=proposal.parameters,
+                    policy_allowed=True,
+                    policy_reason=f"Action held for human administrator approval ({approval_req.approval_id}).",
+                    status="PENDING_APPROVAL",
+                    guardian_verdict=guardian_verdict,
+                )
+                task.steps.append(step_res)
+                step_idx += 1
+                continue
+
+            # 3. Execution against Phase 2 Mock Tool Service
             step_res = await ToolExecutor.execute(
                 actor=actor,
                 proposal=proposal,
                 step_number=step_idx,
             )
+            step_res.guardian_verdict = guardian_verdict
             task.steps.append(step_res)
             step_idx += 1
 
@@ -125,7 +174,9 @@ class TargetAgentOrchestrator:
 
         # Final Status Assignment
         if task.status != TaskStatus.BLOCKED:
-            if blocked_count > 0 and blocked_count == len(task.steps):
+            if any(s.status == "PENDING_APPROVAL" for s in task.steps):
+                task.status = TaskStatus.AWAITING_APPROVAL
+            elif blocked_count > 0 and blocked_count == len(task.steps):
                 task.status = TaskStatus.BLOCKED
                 task.error = "All proposed tool actions were blocked by security policies."
             else:

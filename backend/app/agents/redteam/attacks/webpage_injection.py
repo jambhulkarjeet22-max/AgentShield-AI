@@ -73,3 +73,4 @@ class FakePatchPageInjection(BaseAttack):
         # Page browse may succeed — the content is inert text.
         # No file write, no code execution, no external download should occur.
         return AttackOutcome.DEFENCE_HELD
+

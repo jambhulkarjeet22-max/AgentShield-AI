@@ -260,3 +260,4 @@ class TestPhase123Regression:
         )
         assert resp.status_code == 201
         assert resp.json()["status"] in ("COMPLETED", "BLOCKED")
+
