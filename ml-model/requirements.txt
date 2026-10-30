@@ -1,0 +1,8 @@
+# Standalone dependencies for AgentShield-AI ML Prompt Injection Model
+pandas>=2.2.0
+scikit-learn>=1.4.0
+numpy>=1.26.0
+joblib>=1.3.0
+fastapi>=0.110.0
+uvicorn>=0.28.0
+

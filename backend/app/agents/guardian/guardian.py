@@ -4,7 +4,7 @@ Intercepts Target Agent tool proposals between PolicyValidator and ToolExecutor,
 enforcing intent verification, multi-signal anomaly detection, and risk scoring.
 """
 
-from typing import List
+from typing import List, Optional
 
 from backend.app.agents.guardian.approvals import approval_store
 from backend.app.agents.guardian.schemas import (
@@ -18,6 +18,7 @@ from backend.app.agents.target.schemas import StepResult, ToolCallProposal
 from backend.app.core.logging import get_logger
 from backend.app.security.actors import MockActor
 from backend.app.security.audit import audit_service
+from backend.app.services.ml_client import MLClient
 
 logger = get_logger("agentshield.agents.guardian")
 
@@ -34,6 +35,7 @@ class BlueTeamGuardian:
         prior_steps: List[StepResult],
         task_id: str,
         step_number: int,
+        ml_client: Optional[MLClient] = None,
     ) -> GuardianVerdict:
         """Evaluate a proposed tool call and issue an authoritative verdict.
 
@@ -45,6 +47,7 @@ class BlueTeamGuardian:
             proposal=proposal,
             instruction=instruction,
             prior_steps=prior_steps,
+            ml_client=ml_client,
         )
 
         # Record in in-memory decision store
@@ -75,6 +78,7 @@ class BlueTeamGuardian:
                 "risk_score": verdict.risk_score,
                 "signals": [s.signal_id for s in verdict.signals_triggered],
                 "intent_alignment": verdict.intent_alignment,
+                "ml_advisory": verdict.ml_advisory.model_dump() if verdict.ml_advisory else None,
             },
         )
 

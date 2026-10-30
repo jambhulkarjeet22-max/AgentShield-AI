@@ -27,16 +27,44 @@ class Settings(BaseSettings):
     HOST: str = Field(default="127.0.0.1", description="Server host binding")
     PORT: int = Field(default=8000, description="Server port")
 
-    # Database & Storage
+    # Database & Storage (PostgreSQL with SQLAlchemy 2.0)
+    POSTGRES_USER: str = Field(default="agentshield", description="PostgreSQL database username")
+    POSTGRES_PASSWORD: str = Field(default="agentshield_secret", description="PostgreSQL database password")
+    POSTGRES_HOST: str = Field(default="localhost", description="PostgreSQL host")
+    POSTGRES_PORT: int = Field(default=5432, description="PostgreSQL port")
+    POSTGRES_DB: str = Field(default="agentshield_db", description="PostgreSQL database name")
     DATABASE_URL: str = Field(
-        default="sqlite:///./agentshield.db",
-        description="Database connection URL",
+        default="postgresql+psycopg://agentshield:agentshield_secret@localhost:5432/agentshield_db",
+        description="Primary PostgreSQL database connection URL (postgresql+psycopg://)",
     )
+    DATABASE_POOL_SIZE: int = Field(default=10, description="SQLAlchemy connection pool size")
+    DATABASE_MAX_OVERFLOW: int = Field(default=20, description="SQLAlchemy connection pool max overflow")
+    DATABASE_ECHO: bool = Field(default=False, description="Log generated SQL statements")
 
-    # Machine Learning & Artifacts (paths for later phases)
+    # Machine Learning & Prompt Injection Service Configuration
     MODEL_PATH: str = Field(
         default="ml-model/artifacts/prompt_injection_model.joblib",
         description="Path to ML model artifacts",
+    )
+    ML_SERVICE_ENABLED: bool = Field(
+        default=True,
+        description="Enable ML advisory integration with Blue Team Guardian",
+    )
+    ML_SERVICE_URL: str = Field(
+        default="http://localhost:8001",
+        description="URL for standalone ML prompt injection prediction microservice",
+    )
+    ML_SERVICE_TIMEOUT_SECONDS: float = Field(
+        default=1.5,
+        description="Fail-fast timeout in seconds for ML inference",
+    )
+    ML_PROBABILITY_THRESHOLD: float = Field(
+        default=0.65,
+        description="Operational probability threshold for ML prompt injection advisory",
+    )
+    ML_MARGIN_THRESHOLD: float = Field(
+        default=0.55,
+        description="Decision margin threshold for ML prompt injection advisory",
     )
 
     # LLM Provider Configuration (Phase 3)

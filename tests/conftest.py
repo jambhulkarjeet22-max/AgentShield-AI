@@ -15,6 +15,7 @@ from backend.app.agents.redteam.state import campaign_state_store
 from backend.app.agents.guardian.state import guardian_decision_store
 from backend.app.agents.guardian.approvals import approval_store
 from backend.app.security.actors import MOCK_ACTORS
+from backend.app.services.ml_client import set_ml_client
 from backend.app.tools import reset_all_mock_tools
 
 
@@ -33,12 +34,14 @@ def reset_mock_state():
     campaign_state_store.reset()
     guardian_decision_store.reset()
     approval_store.reset()
+    set_ml_client(None)
     yield
     reset_all_mock_tools()
     task_state_store.reset()
     campaign_state_store.reset()
     guardian_decision_store.reset()
     approval_store.reset()
+    set_ml_client(None)
 
 
 @pytest.fixture

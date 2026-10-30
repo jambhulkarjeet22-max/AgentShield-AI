@@ -4,7 +4,7 @@ Synthesizes intent alignment and individual risk signals into a composite
 risk score (0.0 to 100.0) and issues an authoritative GuardianDecision.
 """
 
-from typing import List
+from typing import List, Optional
 
 from backend.app.agents.guardian.config import (
     ALLOW_THRESHOLD,
@@ -21,6 +21,7 @@ from backend.app.agents.guardian.signals import (
     detect_intent_mismatch,
     detect_large_payment,
     detect_malicious_context,
+    detect_ml_prompt_injection,
     detect_sensitivity_violation,
     detect_step_velocity_anomaly,
     detect_unknown_recipient,
@@ -30,6 +31,7 @@ from backend.app.agents.guardian.signals import (
 from backend.app.agents.target.schemas import StepResult, ToolCallProposal
 from backend.app.core.logging import get_logger
 from backend.app.security.actors import MockActor
+from backend.app.services.ml_client import MLClient
 
 logger = get_logger("agentshield.agents.guardian.scorer")
 
@@ -44,6 +46,7 @@ class RiskScorer:
         proposal: ToolCallProposal,
         instruction: str,
         prior_steps: List[StepResult],
+        ml_client: Optional[MLClient] = None,
     ) -> GuardianVerdict:
         """Run all detectors, compute composite score, and render verdict."""
         # 1. Compute Intent Alignment
@@ -89,6 +92,11 @@ class RiskScorer:
         if sig:
             triggered_signals.append(sig)
 
+        # SIGNAL-09: ML Prompt Injection Advisory Signal (advisory only, fail-safe fallback)
+        ml_sig, ml_meta = detect_ml_prompt_injection(instruction, prior_steps, ml_client=ml_client)
+        if ml_sig:
+            triggered_signals.append(ml_sig)
+
         # 3. Calculate Total Score (capped at 100.0)
         raw_score = sum(s.weight for s in triggered_signals)
         risk_score = min(100.0, max(0.0, round(raw_score, 1)))
@@ -133,5 +141,6 @@ class RiskScorer:
             signals_triggered=triggered_signals,
             explanation=explanation,
             intent_alignment=intent_score,
+            ml_advisory=ml_meta,
         )
 

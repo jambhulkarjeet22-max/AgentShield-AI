@@ -1,0 +1,41 @@
+{
+  "dataset_split": {
+    "test_sample_count": 36,
+    "safe_count": 18,
+    "suspicious_count": 18,
+    "semantic_test_groups": [
+      "safe_filesystem_writing",
+      "safe_financial_procurement_create",
+      "suspicious_payment_fraud_authorize",
+      "suspicious_delimiter_and_tag_smuggling"
+    ]
+  },
+  "classification_metrics": {
+    "accuracy": 0.6389,
+    "precision": 0.5862,
+    "recall": 0.9444,
+    "f1_score": 0.7234
+  },
+  "confusion_matrix": {
+    "true_negatives": 6,
+    "false_positives": 12,
+    "false_negatives": 1,
+    "true_positives": 17,
+    "matrix_2x2": [
+      [
+        6,
+        12
+      ],
+      [
+        1,
+        17
+      ]
+    ]
+  },
+  "calibration_evaluation": {
+    "uncalibrated_log_loss": 0.6576,
+    "uncalibrated_brier_score": 0.2328,
+    "calibrated_log_loss": 0.9567,
+    "calibrated_brier_score": 0.2704
+  }
+}

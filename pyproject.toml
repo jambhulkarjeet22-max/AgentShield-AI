@@ -17,6 +17,9 @@ dependencies = [
     "pydantic>=2.6.0,<3.0.0",
     "pydantic-settings>=2.2.0,<3.0.0",
     "python-dotenv>=1.0.0,<2.0.0",
+    "sqlalchemy>=2.0.28,<3.0.0",
+    "alembic>=1.13.1,<2.0.0",
+    "psycopg[binary]>=3.1.18,<4.0.0",
 ]
 
 [project.optional-dependencies]
@@ -27,8 +30,8 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["backend", "."]
+testpaths = ["tests", "ml-model/tests"]
+pythonpath = ["backend", "ml-model", "."]
 asyncio_mode = "auto"
 filterwarnings = [
     "ignore::starlette.exceptions.StarletteDeprecationWarning",

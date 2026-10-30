@@ -24,6 +24,17 @@ class RiskSignal(BaseModel):
     severity: str = Field(description="Severity tier: LOW, MEDIUM, HIGH, CRITICAL")
 
 
+class MLInferenceMetadata(BaseModel):
+    """Metadata regarding ML prompt injection advisory inference."""
+
+    service_available: bool = Field(description="Whether ML service responded")
+    is_suspicious: bool = Field(description="Advisory prompt injection flag")
+    probability: float = Field(description="Estimated injection probability")
+    decision_margin: float = Field(description="Decision margin from linear model")
+    label: str = Field(description="SAFE, SUSPICIOUS, or UNAVAILABLE")
+    fallback_reason: Optional[str] = Field(default=None, description="Fallback reason if offline")
+
+
 class GuardianVerdict(BaseModel):
     """Detailed verdict returned by the Blue Team Guardian for a single tool proposal."""
 
@@ -32,6 +43,10 @@ class GuardianVerdict(BaseModel):
     signals_triggered: List[RiskSignal] = Field(default_factory=list, description="Triggered risk signals")
     explanation: str = Field(description="Human-readable explanation synthesizing the decision")
     intent_alignment: float = Field(ge=0.0, le=1.0, description="Instruction-to-action intent alignment score")
+    ml_advisory: Optional[MLInferenceMetadata] = Field(
+        default=None,
+        description="Optional advisory ML prompt injection inference metadata",
+    )
     timestamp: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat(),
         description="Timestamp of evaluation",
@@ -94,6 +109,10 @@ class GuardianDecisionRecord(BaseModel):
     signals_triggered: List[str] = Field(default_factory=list, description="IDs of triggered signals")
     explanation: str = Field(description="Synthesized decision explanation")
     intent_alignment: float = Field(description="Computed intent alignment")
+    ml_advisory: Optional[MLInferenceMetadata] = Field(
+        default=None,
+        description="Optional advisory ML prompt injection inference metadata",
+    )
     timestamp: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat(),
         description="Record timestamp",

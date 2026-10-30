@@ -6,7 +6,7 @@ returning an Optional[RiskSignal].
 """
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from backend.app.agents.guardian.config import (
@@ -18,7 +18,9 @@ from backend.app.agents.guardian.config import (
     SIGNAL_SEVERITIES,
     SIGNAL_WEIGHTS,
 )
-from backend.app.agents.guardian.schemas import RiskSignal
+from backend.app.agents.guardian.schemas import MLInferenceMetadata, RiskSignal
+from backend.app.core.config import settings
+from backend.app.services.ml_client import MLClient, get_ml_client
 from backend.app.agents.target.schemas import StepResult, ToolCallProposal
 from backend.app.security.actors import MockActor
 from backend.app.security.intent_rules import is_action_explicitly_denied
@@ -252,4 +254,68 @@ def detect_write_after_browse(
                 severity=SIGNAL_SEVERITIES[sig_id],
             )
     return None
+
+
+def detect_ml_prompt_injection(
+    instruction: str,
+    prior_steps: List[StepResult],
+    ml_client: Optional[MLClient] = None,
+) -> Tuple[Optional[RiskSignal], Optional[MLInferenceMetadata]]:
+    """SIGNAL-09: Evaluates input text and untrusted context with the ML prediction microservice.
+
+    Returns an advisory RiskSignal if the probability or margin crosses operational thresholds.
+    Falls back safely if the ML service is offline, disabled, or times out.
+    """
+    client = ml_client or get_ml_client()
+    result = client.predict(instruction)
+
+    if not result.available:
+        meta = MLInferenceMetadata(
+            service_available=False,
+            is_suspicious=False,
+            probability=0.0,
+            decision_margin=0.0,
+            label=result.label,
+            fallback_reason=result.fallback_reason,
+        )
+        return None, meta
+
+    meta = MLInferenceMetadata(
+        service_available=True,
+        is_suspicious=result.is_suspicious,
+        probability=result.probability,
+        decision_margin=result.decision_margin,
+        label=result.label,
+        fallback_reason=None,
+    )
+
+    if result.is_suspicious and (
+        result.probability >= settings.ML_PROBABILITY_THRESHOLD
+        or result.decision_margin >= settings.ML_MARGIN_THRESHOLD
+    ):
+        sig_id = "ML_PROMPT_INJECTION_ADVISORY"
+        signal = RiskSignal(
+            signal_id=sig_id,
+            description=(
+                f"ML classifier flagged prompt as SUSPICIOUS "
+                f"(P={result.probability:.2f}, margin={result.decision_margin:+.2f})."
+            ),
+            weight=SIGNAL_WEIGHTS[sig_id],
+            severity=SIGNAL_SEVERITIES[sig_id],
+        )
+        return signal, meta
+    elif result.is_suspicious or result.probability >= 0.50:
+        sig_id = "ML_PROMPT_INJECTION_WARNING"
+        signal = RiskSignal(
+            signal_id=sig_id,
+            description=(
+                f"ML classifier noted borderline lexical similarity "
+                f"(P={result.probability:.2f}, margin={result.decision_margin:+.2f})."
+            ),
+            weight=SIGNAL_WEIGHTS[sig_id],
+            severity=SIGNAL_SEVERITIES[sig_id],
+        )
+        return signal, meta
+
+    return None, meta
 

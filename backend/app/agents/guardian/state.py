@@ -38,6 +38,7 @@ class GuardianDecisionStore:
             signals_triggered=[s.signal_id for s in verdict.signals_triggered],
             explanation=verdict.explanation,
             intent_alignment=verdict.intent_alignment,
+            ml_advisory=verdict.ml_advisory,
         )
         with self._lock:
             self._decisions[record.record_id] = record
