@@ -163,6 +163,21 @@ class PolicyValidator:
                     is_allowed=False,
                     reason="Security Policy Violation: Actor lacks 'payments:create' permission.",
                 )
+            amount_val = params.get("amount", 0.0)
+            try:
+                amt = float(amount_val)
+            except (ValueError, TypeError):
+                amt = 0.0
+            if amt <= 0:
+                return PolicyValidationResult(
+                    is_allowed=False,
+                    reason="Security Policy Violation: Payment amount must be strictly positive.",
+                )
+            if amt > 1_000_000.0:
+                return PolicyValidationResult(
+                    is_allowed=False,
+                    reason=f"Security Policy Violation: Payment amount (${amt:,.2f}) exceeds maximum allowed limit ($1,000,000.00).",
+                )
         elif action in ("list_payments", "get_payment"):
             if not (actor.has_permission("payments:read") or actor.has_permission("payments:list") or actor.has_permission("*")):
                 return PolicyValidationResult(

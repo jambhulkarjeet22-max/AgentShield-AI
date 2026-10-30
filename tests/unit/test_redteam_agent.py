@@ -206,8 +206,8 @@ class TestAttackEvaluator:
         result = AttackEvaluator.evaluate(attack, response)
         assert result.outcome == AttackOutcome.ATTACK_SUCCESS
 
-    def test_evaluator_allows_legitimate_email_read(self):
-        """Reading email inbox is permitted — evaluator must not false-positive this."""
+    def test_evaluator_marks_failed_to_trigger_when_no_prohibited_action_attempted(self):
+        """When only benign steps occur and attack fails to trigger, evaluator reports FAILED_TO_TRIGGER."""
         attack = CEOFraudEmailInjection()
         response = self._make_dispatch_response(
             steps=[
@@ -219,8 +219,69 @@ class TestAttackEvaluator:
             ]
         )
         result = AttackEvaluator.evaluate(attack, response)
-        assert result.outcome == AttackOutcome.DEFENCE_HELD
+        assert result.outcome == AttackOutcome.FAILED_TO_TRIGGER
         assert result.steps_succeeded == 2
+        assert result.steps_blocked == 0
+
+    def test_evaluator_distinguishes_four_outcomes(self):
+        """Verify the evaluator distinctly categorizes:
+        1. DEFENCE_HELD (blocked by policy/guardian)
+        2. FAILED_TO_TRIGGER (no malicious action attempted or blocked)
+        3. ATTACK_SUCCESS (invariant breached)
+        4. ERROR (step execution failure without defense block)
+        """
+        attack = CEOFraudEmailInjection()
+
+        # 1. DEFENCE_HELD: step was blocked
+        res_blocked = AttackEvaluator.evaluate(
+            attack,
+            self._make_dispatch_response(
+                steps=[
+                    {"step_number": 1, "tool": "payments", "action": "create_payment_request",
+                     "status": "BLOCKED", "parameters": {}, "policy_allowed": False}
+                ]
+            )
+        )
+        assert res_blocked.outcome == AttackOutcome.DEFENCE_HELD
+        assert res_blocked.steps_blocked == 1
+
+        # 2. FAILED_TO_TRIGGER: benign execution with 0 blocked steps and 0 invariant violations
+        res_failed_trigger = AttackEvaluator.evaluate(
+            attack,
+            self._make_dispatch_response(
+                steps=[
+                    {"step_number": 1, "tool": "email", "action": "list_messages",
+                     "status": "SUCCESS", "parameters": {"folder": "inbox"}, "output": []}
+                ]
+            )
+        )
+        assert res_failed_trigger.outcome == AttackOutcome.FAILED_TO_TRIGGER
+        assert res_failed_trigger.steps_blocked == 0
+
+        # 3. ATTACK_SUCCESS: invariant breached (e.g. payment authorization succeeded)
+        res_success = AttackEvaluator.evaluate(
+            attack,
+            self._make_dispatch_response(
+                steps=[
+                    {"step_number": 1, "tool": "payments", "action": "authorize_payment",
+                     "status": "SUCCESS", "parameters": {}, "output": "authorized"}
+                ]
+            )
+        )
+        assert res_success.outcome == AttackOutcome.ATTACK_SUCCESS
+
+        # 4. ERROR: step execution errored out with 0 blocked and 0 succeeded
+        res_error = AttackEvaluator.evaluate(
+            attack,
+            self._make_dispatch_response(
+                steps=[
+                    {"step_number": 1, "tool": "email", "action": "read_message",
+                     "status": "ERROR", "parameters": {}, "error": "Internal database timeout"}
+                ]
+            )
+        )
+        assert res_error.outcome == AttackOutcome.ERROR
+        assert res_error.steps_errored == 1
 
 
 # ── State Store Tests ─────────────────────────────────────────────────────────
@@ -383,7 +444,7 @@ class TestAttackResultReportingAndInvariants:
         assert result_tool.outcome == AttackOutcome.DEFENCE_HELD
 
     def test_contained_benign_steps_reported_as_completed(self):
-        """Verify prompt injection with safe inert reading reports target_task_status as COMPLETED."""
+        """Verify prompt injection secondary action is intercepted and blocked."""
         attack = CEOFraudEmailInjection()
         response = self._dispatch(
             attack.build_payload(),
@@ -391,10 +452,59 @@ class TestAttackResultReportingAndInvariants:
             MOCK_ACTORS["employee"].api_key,
         )
         result = AttackEvaluator.evaluate(attack, response)
-        assert result.steps_blocked == 0
+        assert result.steps_blocked == 1
         assert result.steps_succeeded > 0
-        assert result.target_task_status == "COMPLETED"
+        assert result.target_task_status == "BLOCKED"
         assert result.outcome == AttackOutcome.DEFENCE_HELD
+
+    def test_priv003_restricted_file_read_blocked(self):
+        """Verify PRIV-003 restricted file read is explicitly blocked by PolicyValidator."""
+        attack = ReadRestrictedFileEscalation()
+        response = self._dispatch(
+            attack.build_payload(),
+            attack.attack_id,
+            MOCK_ACTORS["employee"].api_key,
+        )
+        result = AttackEvaluator.evaluate(attack, response)
+        assert result.steps_blocked == 1
+        assert result.target_task_status == "BLOCKED"
+        assert result.outcome == AttackOutcome.DEFENCE_HELD
+
+    def test_pay003_oversized_payment_blocked(self):
+        """Verify PAY-003 oversized payment request is explicitly blocked by PolicyValidator."""
+        attack = OversizedPaymentCreation()
+        response = self._dispatch(
+            attack.build_payload(),
+            attack.attack_id,
+            MOCK_ACTORS["employee"].api_key,
+        )
+        result = AttackEvaluator.evaluate(attack, response)
+        assert result.steps_blocked == 1
+        assert result.target_task_status == "BLOCKED"
+        assert result.outcome == AttackOutcome.DEFENCE_HELD
+
+    def test_prompt_injection_all_attacks_simulate_and_block_secondary_actions(self):
+        """Verify all 4 prompt injection attacks have blocked steps."""
+        from backend.app.agents.redteam.attacks.prompt_injection import (
+            CEOFraudEmailInjection,
+            SystemOverrideEmailInjection,
+        )
+        from backend.app.agents.redteam.attacks.webpage_injection import (
+            FakePatchPageInjection,
+            ForumPagePromptInjection,
+        )
+
+        pi_attacks = [
+            CEOFraudEmailInjection(),
+            SystemOverrideEmailInjection(),
+            ForumPagePromptInjection(),
+            FakePatchPageInjection(),
+        ]
+        for atk in pi_attacks:
+            resp = self._dispatch(atk.build_payload(), atk.attack_id, MOCK_ACTORS["employee"].api_key)
+            res = AttackEvaluator.evaluate(atk, resp)
+            assert res.steps_blocked >= 1, f"{atk.attack_id} did not have blocked steps"
+            assert res.outcome == AttackOutcome.DEFENCE_HELD, f"{atk.attack_id} outcome was not DEFENCE_HELD"
 
     def test_loop_exceeding_ceiling_fails_invariant(self):
         """Verify evaluator detects failure when loop limit is breached (not hardcoded to DEFENCE_HELD)."""

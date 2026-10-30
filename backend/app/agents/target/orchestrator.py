@@ -179,6 +179,9 @@ class TargetAgentOrchestrator:
             elif blocked_count > 0 and blocked_count == len(task.steps):
                 task.status = TaskStatus.BLOCKED
                 task.error = "All proposed tool actions were blocked by security policies."
+            elif all(s.status == "ERROR" for s in task.steps) and len(task.steps) > 0:
+                task.status = TaskStatus.FAILED
+                task.error = "All proposed tool actions failed with execution errors."
             else:
                 task.status = TaskStatus.COMPLETED
 

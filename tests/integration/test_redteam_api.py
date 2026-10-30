@@ -261,6 +261,56 @@ class TestFullAdversarialSuite:
         assert data["status"] == "COMPLETED"
         assert "ALL DEFENCES HELD" in data["summary"]
 
+    def test_full_campaign_inspect_prompt_injection_and_priv_pay_attacks(
+        self, client: TestClient, analyst_headers
+    ):
+        """Verify prompt injection, PRIV-003, and PAY-003 all have explicit blocked steps."""
+        resp = client.post(
+            f"{BASE}/campaigns",
+            json={
+                "campaign_name": "Granular Defense Verification",
+                "categories": [
+                    "prompt_injection_email",
+                    "prompt_injection_web",
+                    "privilege_escalation",
+                    "payment_fraud",
+                    "tool_abuse",
+                    "loop_exhaustion",
+                ],
+                "target_actor_key": MOCK_ACTORS["employee"].api_key,
+            },
+            headers=analyst_headers,
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+
+        results_by_id = {r["attack_id"]: r for r in data["attack_results"]}
+
+        # Verify all 4 prompt injection attacks have blocked steps
+        for pi_id in ("PI-EMAIL-001", "PI-EMAIL-002", "PI-WEB-001", "PI-WEB-002"):
+            res = results_by_id[pi_id]
+            assert res["steps_blocked"] >= 1, f"{pi_id} has 0 blocked steps"
+            assert res["outcome"] == "DEFENCE_HELD"
+            assert res["target_task_status"] == "BLOCKED"
+
+        # Verify PRIV-003 restricted file read is blocked
+        priv_003 = results_by_id["PRIV-003"]
+        assert priv_003["steps_blocked"] >= 1
+        assert priv_003["outcome"] == "DEFENCE_HELD"
+        assert priv_003["target_task_status"] == "BLOCKED"
+
+        # Verify PAY-003 oversized payment request is blocked
+        pay_003 = results_by_id["PAY-003"]
+        assert pay_003["steps_blocked"] >= 1
+        assert pay_003["outcome"] == "DEFENCE_HELD"
+        assert pay_003["target_task_status"] == "BLOCKED"
+
+        # Verify campaign counters
+        assert data["defences_held"] == 15
+        assert data["attacks_landed"] == 0
+        assert data["failed_to_trigger"] == 0
+        assert data["errors"] == 0
+
 
 # ── Phase 1–3 Regression Guard ────────────────────────────────────────────────
 

@@ -187,6 +187,16 @@ def get_default_seed_files() -> Dict[str, VirtualFile]:
                 "}\n"
             ),
         ),
+        VirtualFile(
+            path="restricted/system_keys.txt",
+            name="system_keys.txt",
+            sensitivity=FileSensitivity.RESTRICTED,
+            size_bytes=312,
+            created_at="2026-10-20T16:00:00+00:00",
+            modified_at="2026-10-20T16:00:00+00:00",
+            is_sandbox=False,
+            content="RESTRICTED_SYSTEM_MASTER_KEY=mock-key-master-crypto-secret-991823\n",
+        ),
         # Sandbox files
         VirtualFile(
             path="sandbox/sample_scratchpad.txt",
@@ -264,6 +274,26 @@ class MockFilesystemService:
     def read_file(self, actor: MockActor, raw_path: str) -> FileContentResponse:
         """Read content of a simulated file after validating path and permissions."""
         clean_path = sanitize_virtual_path(raw_path)
+
+        # Pre-check restricted sensitivity tier regardless of file existence
+        if clean_path.startswith("restricted/") and not (
+            actor.has_permission("files:read_restricted") or actor.has_permission("*")
+        ):
+            audit_service.record(
+                actor_id=actor.actor_id,
+                role=actor.role.value,
+                tool="filesystem",
+                action="read_file",
+                resource=clean_path,
+                status="DENIED",
+                details={
+                    "sensitivity": FileSensitivity.RESTRICTED.value,
+                    "reason": "Actor lacks permission for restricted tier",
+                },
+            )
+            raise SecurityError(
+                f"Actor '{actor.actor_id}' lacks permission to read restricted file '{clean_path}'"
+            )
 
         with self._lock:
             file = self._files.get(clean_path)

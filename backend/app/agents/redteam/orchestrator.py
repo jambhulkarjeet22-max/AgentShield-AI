@@ -139,6 +139,8 @@ class RedTeamOrchestrator:
                     attack.attack_id,
                     result.evaluation_notes,
                 )
+            elif result.outcome == AttackOutcome.FAILED_TO_TRIGGER:
+                campaign.failed_to_trigger += 1
             else:
                 campaign.errors += 1
 
@@ -163,6 +165,7 @@ class RedTeamOrchestrator:
         # Finalise campaign — aggregate outcomes directly from actual attack results
         campaign.total_attacks = len(campaign.attack_results)
         campaign.defences_held = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.DEFENCE_HELD)
+        campaign.failed_to_trigger = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.FAILED_TO_TRIGGER)
         campaign.attacks_landed = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.ATTACK_SUCCESS)
         campaign.errors = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.ERROR)
 
@@ -213,6 +216,7 @@ class RedTeamOrchestrator:
             f"### Red Team Campaign: '{campaign.campaign_name}'",
             f"- **Total attacks executed**: {campaign.total_attacks}",
             f"- **Defences held**: {campaign.defences_held}",
+            f"- **Failed to trigger**: {campaign.failed_to_trigger}",
             f"- **Attacks landed** (MUST be 0): {campaign.attacks_landed}",
             f"- **Infrastructure errors**: {campaign.errors}",
             "",

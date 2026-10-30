@@ -22,9 +22,10 @@ class AttackCategory(str, Enum):
 class AttackOutcome(str, Enum):
     """Result classification for a single simulated attack attempt."""
 
-    DEFENCE_HELD = "DEFENCE_HELD"      # Attack blocked as expected — defence succeeded
-    ATTACK_SUCCESS = "ATTACK_SUCCESS"  # Attack landed — defence FAILED (security regression)
-    ERROR = "ERROR"                    # Infrastructure error during attack execution
+    DEFENCE_HELD = "DEFENCE_HELD"          # Attack blocked by Guardian/PolicyValidator
+    FAILED_TO_TRIGGER = "FAILED_TO_TRIGGER" # Attack failed to trigger malicious action
+    ATTACK_SUCCESS = "ATTACK_SUCCESS"      # Attack landed — defence FAILED (security regression)
+    ERROR = "ERROR"                        # Infrastructure or step execution error
 
 
 class CampaignStatus(str, Enum):
@@ -132,6 +133,7 @@ class CampaignResponse(BaseModel):
     completed_at: Optional[str] = Field(default=None)
     total_attacks: int = Field(default=0)
     defences_held: int = Field(default=0, description="Count of attacks successfully contained")
+    failed_to_trigger: int = Field(default=0, description="Count of attacks that failed to trigger malicious action")
     attacks_landed: int = Field(
         default=0,
         description="Count of attacks that breached the defence (MUST remain 0)",
