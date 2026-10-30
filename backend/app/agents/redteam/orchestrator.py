@@ -160,7 +160,12 @@ class RedTeamOrchestrator:
                 },
             )
 
-        # Finalise campaign
+        # Finalise campaign — aggregate outcomes directly from actual attack results
+        campaign.total_attacks = len(campaign.attack_results)
+        campaign.defences_held = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.DEFENCE_HELD)
+        campaign.attacks_landed = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.ATTACK_SUCCESS)
+        campaign.errors = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.ERROR)
+
         campaign.completed_at = datetime.now(timezone.utc).isoformat()
         campaign.status = CampaignStatus.COMPLETED
         campaign.summary = cls._build_campaign_summary(campaign)

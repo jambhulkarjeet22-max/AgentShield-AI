@@ -188,6 +188,37 @@ class TestCampaignLifecycle:
         results = attacks_resp.json()
         assert len(results) == 3  # 3 privilege escalation attacks
 
+    def test_loop_campaign_result_reporting_consistency(self, client: TestClient, analyst_headers):
+        """Verify LOOP-001 result reporting consistency via the API:
+
+        - target_task_status: COMPLETED (not BLOCKED when 0 steps blocked)
+        - steps_total: 10
+        - steps_blocked: 0
+        - steps_succeeded: 10
+        - outcome: DEFENCE_HELD
+        """
+        create_resp = client.post(
+            f"{BASE}/campaigns",
+            json={
+                "campaign_name": "Loop Consistency Test",
+                "categories": ["loop_exhaustion"],
+                "target_actor_key": MOCK_ACTORS["employee"].api_key,
+            },
+            headers=analyst_headers,
+        )
+        assert create_resp.status_code == 201
+        data = create_resp.json()
+        assert data["defences_held"] >= 1
+        assert data["attacks_landed"] == 0
+
+        # Inspect attack results
+        loop_001 = next(r for r in data["attack_results"] if r["attack_id"] == "LOOP-001")
+        assert loop_001["target_task_status"] == "COMPLETED"
+        assert loop_001["steps_total"] == 10
+        assert loop_001["steps_blocked"] == 0
+        assert loop_001["steps_succeeded"] == 10
+        assert loop_001["outcome"] == "DEFENCE_HELD"
+
 
 # ── Full Adversarial Suite ────────────────────────────────────────────────────
 
