@@ -2,87 +2,180 @@
 
 **Autonomous Multi-Agent Cybersecurity Defence System (Red Team vs Blue Team)**
 
-AgentShield AI is an intelligent cybersecurity simulation platform where autonomous AI agents engage in controlled adversarial scenarios (Red Team offensive attacks vs Blue Team defensive detection and mitigation) within safe, sandboxed mock environments.
+AgentShield AI is an intelligent cybersecurity simulation platform where autonomous AI agents engage in controlled adversarial scenarios (Red Team offensive attacks vs Blue Team defensive detection and mitigation) within safe, sandboxed, deterministic mock environments.
 
 ---
 
-## Architecture Overview (Phase 1: Backend Foundation)
+## Architecture Overview (Phase 1 & Phase 2: Secure Mock Tool Environment)
 
 ```
 AgentShield-AI/
-├── .env.example               # Environment variables template
-├── .gitignore                 # Git ignore rules (protects secrets, caches, artifacts)
-├── pyproject.toml             # Python packaging and project configuration
-├── requirements.txt           # Minimal, pinned Python dependencies
-├── README.md                  # Project documentation
+├── .env.example                       # Environment variables template
+├── .gitignore                         # Git ignore rules (protects secrets, caches, artifacts)
+├── pyproject.toml                     # Python packaging and project configuration
+├── requirements.txt                   # Minimal, pinned Python dependencies
+├── README.md                          # Project documentation
 ├── backend/
 │   ├── __init__.py
 │   └── app/
 │       ├── __init__.py
-│       ├── main.py            # FastAPI application entry point & middleware pipeline
-│       ├── core/              # Core configuration, logging, and error handling
+│       ├── main.py                    # FastAPI application entry point & middleware pipeline
+│       ├── core/                      # Core configuration, logging, and error handling
 │       │   ├── __init__.py
-│       │   ├── config.py      # Pydantic BaseSettings environment management
-│       │   ├── logging.py     # Structured JSON logging & secret redaction
-│       │   └── exceptions.py  # Centralized exception handlers & custom errors
-│       ├── api/               # API Routing Layer
+│       │   ├── config.py              # Pydantic BaseSettings environment management
+│       │   ├── logging.py             # Structured JSON logging & secret redaction
+│       │   └── exceptions.py          # Centralized exception handlers & custom errors
+│       ├── security/                  # Actor authentication, permissions, and audit logging
 │       │   ├── __init__.py
-│       │   └── v1/            # API Version 1
+│       │   ├── actors.py              # Mock Actor Directory (Admin, Analyst, Employee, Guest)
+│       │   └── audit.py               # Structured in-memory audit trail logger
+│       ├── tools/                     # Simulated Cyber Tool Environment
+│       │   ├── __init__.py            # Exported services & reset_all_mock_tools()
+│       │   ├── email/                 # Mock Email System
+│       │   │   ├── __init__.py
+│       │   │   ├── models.py          # Email schemas (EmailMessage, SendEmailRequest)
+│       │   │   └── service.py         # In-memory mailbox (safe + adversarial seed samples)
+│       │   ├── filesystem/            # Sandboxed Virtual Filesystem
+│       │   │   ├── __init__.py
+│       │   │   ├── models.py          # VirtualFile, sensitivity tiers, create payloads
+│       │   │   └── service.py         # Path sanitization, sandbox boundary, permissions
+│       │   ├── browser/               # Simulated Air-Gapped Web Browser
+│       │   │   ├── __init__.py
+│       │   │   ├── models.py          # WebPage models, classification, open requests
+│       │   │   └── service.py         # Predefined inert web pages, internet air-gap
+│       │   └── payments/              # Simulated Mock Payment Gateway
 │       │       ├── __init__.py
-│       │       ├── router.py  # Master API v1 router
+│       │       ├── models.py          # PaymentRequest, status lifecycle, validation
+│       │       └── service.py         # Dual authorization, code verification, audit details
+│       ├── api/                       # API Routing Layer
+│       │   ├── __init__.py
+│       │   └── v1/                    # API Version 1
+│       │       ├── __init__.py
+│       │       ├── router.py          # Master API v1 router
 │       │       └── endpoints/
 │       │           ├── __init__.py
-│       │           └── health.py # Health check endpoints
-│       ├── models/            # Domain models and schemas (Phase 2+)
-│       ├── security/          # Guardrails and policy enforcement (Phase 2+)
-│       ├── services/          # Business logic and coordination (Phase 2+)
-│       ├── tools/             # Mock cyber environment tools (Phase 3+)
-│       └── agents/            # Red Team and Blue Team agents (Phase 4+)
-├── ml-model/                  # Prompt injection / threat classification models
-├── docs/                      # Architectural designs and specs
+│       │           ├── health.py      # System health endpoints
+│       │           └── tools/         # Tool endpoints mounted under /api/v1/tools
+│       │               ├── __init__.py
+│       │               ├── router.py  # Tools router aggregator
+│       │               ├── email.py   # Email API routes
+│       │               ├── files.py   # File system API routes
+│       │               ├── browser.py # Browser API routes
+│       │               ├── payments.py# Payment API routes
+│       │               └── audit.py   # Audit log inspection & reset API
+│       ├── models/                    # Domain models and schemas (Phase 3+)
+│       ├── services/                  # Orchestration services (Phase 3+)
+│       └── agents/                    # Red Team and Blue Team agents (Phase 4+)
+├── ml-model/                          # Prompt injection / threat classification models
+├── docs/                              # Architectural designs and specs
 └── tests/
     ├── __init__.py
-    ├── conftest.py            # Pytest fixtures and TestClient configuration
+    ├── conftest.py                    # Pytest fixtures and actor headers
     ├── unit/
     │   ├── __init__.py
-    │   ├── test_health.py     # Health endpoint unit tests
-    │   ├── test_config.py     # Configuration unit tests
-    │   └── test_exceptions.py # Exception handling unit tests
+    │   ├── test_health.py             # Health endpoint unit tests
+    │   ├── test_config.py             # Configuration unit tests
+    │   ├── test_exceptions.py         # Exception handling unit tests
+    │   ├── test_tool_email.py         # Email system unit tests
+    │   ├── test_tool_filesystem.py    # Sandboxed filesystem & traversal tests
+    │   ├── test_tool_browser.py       # Browser & inert content unit tests
+    │   ├── test_tool_payments.py      # Payments & authorization unit tests
+    │   └── test_audit_and_security.py # Audit logger and actor security tests
     └── integration/
         ├── __init__.py
-        └── test_api_v1.py     # API v1 integration tests
+        ├── test_api_v1.py             # Base API v1 integration tests
+        └── test_tools_api.py          # Complete mock tools REST API integration suite
 ```
 
 ---
 
-## Core Features Implemented
+## Mock Tool Environment Overview (Phase 2)
 
-1. **Modular FastAPI Architecture**: Scalable application layout separating API endpoints, core configuration, exceptions, models, and services.
-2. **Settings & Configuration**: Environment variable management using `pydantic-settings` with validated defaults and `.env` loading.
-3. **Structured Application Logging**: High-performance JSON logging with automatic secret masking/redaction (e.g., passwords, API keys, bearer tokens) and latency tracking.
-4. **Centralized Exception Handling**: Standardized error responses (`{"success": false, "error": {"code": ..., "message": ...}}`) preventing internal information leakage.
-5. **API Versioning**: Scalable `/api/v1` router structure ready for future endpoints.
-6. **Health Checks**: Operational verification at `GET /health` and `GET /api/v1/health`.
-7. **Security Defaults**: Safe localhost bindings, CORS configuration, no hardcoded secrets, and all future actions confined to isolated mock environments.
+All simulated tools operate strictly within memory and sandbox boundaries. They are deterministic, thread-safe, resettable, and completely disconnected from real-world external services.
+
+### 1. Mock Email System (`/api/v1/tools/email`)
+- **Simulated Inboxes**: In-memory mailbox supporting `inbox`, `sent`, and `archive` folders.
+- **Benign & Adversarial Samples**: Includes legitimate corporate messages alongside realistic inert adversarial attack samples (CEO fraud, spoofed urgent wires, direct prompt injection payloads).
+- **Inert Text Safety**: All email bodies are treated as inert strings. Embedded instructions are never executed.
+- **Air-Gap Guarantee**: No real SMTP or internet email transmission is possible.
+
+### 2. Mock File System (`/api/v1/tools/filesystem`)
+- **Virtual Tiered Classification**: Files categorized into `PUBLIC`, `INTERNAL`, `CONFIDENTIAL`, and `RESTRICTED`.
+- **Sandbox Boundary Enforcement**: File creation and editing are strictly restricted to paths beginning with `sandbox/`.
+- **Path Traversal Shield**: Strictly rejects `../`, `..\`, absolute paths (`/etc/...`, `C:\...`), null bytes (`\x00`), and encoded traversal sequences (`%2e%2e`).
+- **Disk Isolation**: Zero mutation of host filesystem files; operations take place in virtual memory.
+
+### 3. Mock Browser (`/api/v1/tools/browser`)
+- **Predefined Page Registry**: Catalogs trusted internal knowledge base articles, CVE bulletins, simulated phishing portals, and forums containing hidden indirect prompt injection payloads.
+- **Inert Content Rendering**: Webpage bodies are returned as inert text. Web scripts (`<script>`) and active elements are never evaluated or executed.
+- **Zero Internet Access**: Navigation to unmapped public domains returns an air-gap rejection. No real HTTP client outbound requests are made.
+
+### 4. Mock Payment System (`/api/v1/tools/payments`)
+- **Transaction Lifecycle**: Validates states: `PENDING` -> `AUTHORIZED` / `COMPLETED` / `REJECTED`.
+- **Strict Amount Validation**: Requires positive values (`amount > 0`), limits maximum transaction sizes, and enforces ISO currency codes.
+- **Mandatory Authorization Gate**: Execution requires both `payments:authorize` role permission (Admin) and an explicit secret authorization token (`MOCK-AUTH-APPROVED-2026`). Untrusted prompt instructions can never trigger payment completion.
+- **No Real Money**: Operates strictly within simulated transaction logs.
+
+### 5. Structured Audit Logger & Resettability (`/api/v1/tools/audit-logs`, `/api/v1/tools/reset`)
+- **Structured Audit Trails**: Automatically captures `actor_id`, `role`, `tool`, `action`, `resource`, `status` (`ALLOWED`, `DENIED`, `FAILED`), and metadata for every tool call.
+- **Deterministic State Reset**: `POST /api/v1/tools/reset` (or `reset_all_mock_tools()`) instantly restores all mailboxes, virtual files, browser pages, payment records, and audit logs to their initial default seed state.
 
 ---
 
-## Getting Started
+## Mock Actor Directory & Authentication
 
-### Prerequisites
-- Python 3.11+
-- Virtual environment (`venv`)
+Authentication in the mock environment uses the `X-API-Key` (or `X-Mock-Auth`) request header. Unauthenticated or unrecognized callers default to the safe `ANONYMOUS` role with minimal read-only public access.
 
-### 1. Clone & Set Up Virtual Environment
+| Actor Name | Actor ID | Role | Mock API Key | Permitted Actions |
+| :--- | :--- | :--- | :--- | :--- |
+| **Admin** | `admin-001` | `ADMIN` | `mock-key-admin-secret-7701` | Full universal access (`*`), payment authorization, reset |
+| **Security Analyst** | `analyst-001` | `SECURITY_ANALYST` | `mock-key-analyst-secret-5502` | Read all files up to `CONFIDENTIAL`, read emails, browse, read audit logs |
+| **Employee** | `employee-001` | `EMPLOYEE` | `mock-key-employee-secret-3303` | Read `PUBLIC`/`INTERNAL` files, write to `sandbox/`, send emails, create payment requests |
+| **Guest** | `guest-001` | `GUEST` | `mock-key-guest-secret-1104` | Read `PUBLIC` files, browse trusted pages |
+| **Untrusted Agent** | `untrusted-agent-001` | `UNTRUSTED_AGENT` | `mock-key-untrusted-agent-0000` | Read `PUBLIC` files, browse pages (least privilege for AI testing) |
+| **Anonymous** | `anonymous-user` | `ANONYMOUS` | *(none / invalid)* | Read `PUBLIC` files only |
 
+---
+
+## API Endpoints Reference
+
+### System & Health Endpoints
+- `GET /health` — Root health check (`status`, `version`, `environment`, `timestamp`)
+- `GET /api/v1/health` — API v1 health check
+- `GET /` — API metadata and documentation links
+- `GET /docs` — Interactive OpenAPI Swagger UI
+
+### Mock Email Endpoints (`/api/v1/tools/email`)
+- `GET /api/v1/tools/email/messages` — List simulated emails in folder (`inbox`, `sent`)
+- `GET /api/v1/tools/email/messages/{message_id}` — Read simulated email by ID
+- `POST /api/v1/tools/email/send` — Send simulated email (stored in mock mailbox)
+
+### Mock File Endpoints (`/api/v1/tools/files`)
+- `GET /api/v1/tools/files` — List accessible simulated files
+- `GET /api/v1/tools/files/content?path={virtual_path}` — Read virtual file content
+- `POST /api/v1/tools/files` — Create or update file strictly in `sandbox/`
+
+### Mock Browser Endpoints (`/api/v1/tools/browser`)
+- `GET /api/v1/tools/browser/pages` — List catalog of registered simulated web pages
+- `GET /api/v1/tools/browser/pages/{page_id}` — Retrieve simulated web page by ID
+- `POST /api/v1/tools/browser/open` — Open simulated page by URL or page ID
+
+### Mock Payment Endpoints (`/api/v1/tools/payments`)
+- `GET /api/v1/tools/payments` — View list of payment requests
+- `GET /api/v1/tools/payments/{transaction_id}` — View specific payment transaction
+- `POST /api/v1/tools/payments/request` — Initiate simulated payment request (starts in `PENDING`)
+- `POST /api/v1/tools/payments/{transaction_id}/authorize` — Authorize & execute payment with key
+
+### Audit & Environment Control Endpoints
+- `GET /api/v1/tools/audit-logs` — Query structured audit logs
+- `POST /api/v1/tools/reset` — Reset all mock tool states to initial seeds
+
+---
+
+## Getting Started & Verification
+
+### 1. Setup Virtual Environment
 ```bash
-# Clone the repository
-git clone <repo-url>
-cd AgentShield-AI
-
-# Create virtual environment
-python -m venv .venv
-
 # Activate virtual environment (Windows PowerShell)
 .\.venv\Scripts\Activate.ps1
 
@@ -90,78 +183,24 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 2. Install Dependencies
-
+### 2. Run the Backend Server
 ```bash
-pip install -r requirements.txt
-```
-
-### 3. Environment Configuration
-
-Copy `.env.example` to create your local `.env`:
-
-```bash
-# Windows
-copy .env.example .env
-
-# Linux / macOS
-cp .env.example .env
-```
-
-Default configuration in `.env.example`:
-```env
-APP_NAME=AgentShield-AI
-APP_ENV=development
-DEBUG=false
-API_V1_PREFIX=/api/v1
-
-HOST=127.0.0.1
-PORT=8000
-
-DATABASE_URL=sqlite:///./agentshield.db
-MODEL_PATH=ml-model/artifacts/prompt_injection_model.joblib
-LOG_LEVEL=INFO
-```
-
-### 4. Running the Backend Server
-
-Start the server using Uvicorn:
-
-```bash
-# Using uvicorn directly
 uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
-
-# Or using python module
-python -m backend.app.main
 ```
 
-Once running:
-- **Interactive OpenAPI Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc Documentation**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
-- **Root Health Check**: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
-- **API v1 Health Check**: [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health)
-
----
-
-## Testing
-
-Run the test suite with `pytest`:
-
-```bash
-pytest
-```
-
-For verbose output:
-
+### 3. Run Automated Tests
 ```bash
 pytest -v
 ```
 
 ---
 
-## Security Principles
+## Security Boundaries and Limitations
 
-- **Zero Secret Exposure**: Secrets and sensitive headers are never logged or returned to clients.
-- **Environment Isolation**: All simulations and tools operate strictly in mock environments; no real external credentials, browser sessions, or filesystem mutations outside the sandbox.
-- **Fail-Safe Defaults**: Non-debug mode suppresses internal stack traces in client responses.
-
+1. **Deterministic Mock Simulation**: Tools exist strictly in-memory. They simulate cybersecurity workflows (phishing, prompt injection, unauthorized payments, exfiltration attempts) without posing real-world risks.
+2. **Zero Outbound Capabilities**:
+   - The Email system cannot connect to SMTP servers or send actual emails.
+   - The File system cannot read or write files on the host computer outside the virtual in-memory sandbox.
+   - The Browser cannot make real HTTP requests or connect to the internet.
+   - The Payment system cannot connect to banking APIs or transfer real funds.
+3. **Untrusted Data Isolation**: Text retrieved from emails, files, or webpages is treated as passive, untrusted string data. Under no circumstances can prompt injection instructions override system permissions.
