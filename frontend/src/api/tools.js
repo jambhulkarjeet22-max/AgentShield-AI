@@ -10,7 +10,12 @@ export async function getEmail(messageId) {
 }
 
 export async function sendEmail(payload) {
-  return await api.post('/tools/email/send', payload);
+  const requestBody = {
+    recipient: payload.recipient || payload.to,
+    subject: payload.subject,
+    body: payload.body,
+  };
+  return await api.post('/tools/email/send', requestBody);
 }
 
 // Filesystem Tool

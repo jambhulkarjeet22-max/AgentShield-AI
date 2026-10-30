@@ -39,10 +39,6 @@ class TestFrontendAPIConnectivity:
     """Verify all FastAPI routes mapped to the 8 dashboard pages respond correctly."""
 
     @pytest.fixture
-    def client(self):
-        return TestClient(app)
-
-    @pytest.fixture
     def admin_headers(self):
         return {"X-API-Key": MOCK_ACTORS["admin"].api_key}
 
@@ -167,6 +163,49 @@ class TestFrontendAPIConnectivity:
         # Payments
         pay_resp = client.get("/api/v1/tools/payments", headers=admin_headers)
         assert pay_resp.status_code == 200
+
+    def test_page7_mock_email_send_success(self, client: TestClient, admin_headers):
+        """Page 7 Regression: Successful mock email transmission using expected recipient field."""
+        send_payload = {
+            "recipient": "analyst@internal.corp",
+            "subject": "Weekly Status Update",
+            "body": "Routine status update message for review.",
+        }
+        resp = client.post("/api/v1/tools/email/send", json=send_payload, headers=admin_headers)
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["recipient"] == "analyst@internal.corp"
+        assert data["subject"] == "Weekly Status Update"
+        assert data["body"] == "Routine status update message for review."
+        assert "id" in data
+        assert "timestamp" in data
+
+    def test_page7_mock_email_missing_recipient_validation(self, client: TestClient, admin_headers):
+        """Page 7 Regression: Missing recipient (e.g. passing 'to' instead of 'recipient') fails with 422."""
+        # 1. Payload with 'to' instead of 'recipient'
+        mismatched_payload = {
+            "to": "analyst@internal.corp",
+            "subject": "Weekly Status Update",
+            "body": "Routine status update message for review.",
+        }
+        resp = client.post("/api/v1/tools/email/send", json=mismatched_payload, headers=admin_headers)
+        assert resp.status_code == 422
+        error_data = resp.json()
+        assert error_data["success"] is False
+        details = error_data["error"]["details"]
+        assert any(e["loc"] == ["body", "recipient"] for e in details)
+
+        # 2. Payload with omitted recipient altogether
+        empty_recipient_payload = {
+            "subject": "Weekly Status Update",
+            "body": "Routine status update message for review.",
+        }
+        resp_empty = client.post("/api/v1/tools/email/send", json=empty_recipient_payload, headers=admin_headers)
+        assert resp_empty.status_code == 422
+        error_empty = resp_empty.json()
+        assert error_empty["success"] is False
+        details_empty = error_empty["error"]["details"]
+        assert any(e["loc"] == ["body", "recipient"] for e in details_empty)
 
     def test_page8_audit_logs_endpoint(self, client: TestClient, admin_headers):
         """Page 8: Security audit log ledger."""

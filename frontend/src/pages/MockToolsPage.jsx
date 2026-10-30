@@ -37,9 +37,9 @@ export function MockToolsPage() {
 
   // Email State
   const [emails, setEmails] = useState([]);
-  const [emailTo, setEmailTo] = useState('');
-  const [emailSubject, setEmailSubject] = useState('');
-  const [emailBody, setEmailBody] = useState('');
+  const [emailTo, setEmailTo] = useState('analyst@internal.corp');
+  const [emailSubject, setEmailSubject] = useState('Weekly Status Update');
+  const [emailBody, setEmailBody] = useState('Routine status update message for review.');
 
   // Files State
   const [files, setFiles] = useState([]);
@@ -91,10 +91,10 @@ export function MockToolsPage() {
   const handleSendEmail = async (e) => {
     e.preventDefault();
     setError(null);
-    const res = await sendEmail({ to: emailTo, subject: emailSubject, body: emailBody });
+    const res = await sendEmail({ recipient: emailTo, subject: emailSubject, body: emailBody });
     if (res.ok) {
       setSuccessMsg('Email successfully transmitted to mock inbox!');
-      setEmailTo('');
+      setEmailTo('analyst@internal.corp');
       setEmailSubject('');
       setEmailBody('');
       await loadTabData();
