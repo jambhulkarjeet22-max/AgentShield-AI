@@ -1,7 +1,7 @@
 """Application configuration module using pydantic-settings."""
 
 from functools import lru_cache
-from typing import List, Union
+from typing import List, Optional, Union
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,6 +38,12 @@ class Settings(BaseSettings):
         default="ml-model/artifacts/prompt_injection_model.joblib",
         description="Path to ML model artifacts",
     )
+
+    # LLM Provider Configuration (Phase 3)
+    LLM_PROVIDER: str = Field(default="mock", description="LLM provider: 'mock' (offline deterministic) or 'openai'")
+    LLM_MODEL: str = Field(default="mock-deterministic", description="Model name for provider")
+    LLM_API_KEY: Optional[str] = Field(default=None, description="API key for external LLM provider")
+    LLM_BASE_URL: Optional[str] = Field(default=None, description="Base URL for external LLM provider")
 
     # Logging
     LOG_LEVEL: str = Field(default="INFO", description="Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL")

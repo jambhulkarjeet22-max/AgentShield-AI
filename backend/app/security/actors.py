@@ -65,6 +65,9 @@ MOCK_ACTORS: Dict[str, MockActor] = {
             "payments:read",
             "payments:list",
             "audit:read",
+            "agent:submit",
+            "agent:read",
+            "agent:list",
         },
     ),
     "employee": MockActor(
@@ -85,6 +88,9 @@ MOCK_ACTORS: Dict[str, MockActor] = {
             "payments:create",
             "payments:read",
             "payments:list",
+            "agent:submit",
+            "agent:read",
+            "agent:list",
         },
     ),
     "guest": MockActor(

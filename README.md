@@ -6,7 +6,7 @@ AgentShield AI is an intelligent cybersecurity simulation platform where autonom
 
 ---
 
-## Architecture Overview (Phase 1 & Phase 2: Secure Mock Tool Environment)
+## Architecture Overview (Phases 1–3)
 
 ```
 AgentShield-AI/
@@ -47,6 +47,21 @@ AgentShield-AI/
 │       │       ├── __init__.py
 │       │       ├── models.py          # PaymentRequest, status lifecycle, validation
 │       │       └── service.py         # Dual authorization, code verification, audit details
+│       ├── agents/                    # AI Agent Layer
+│       │   ├── __init__.py
+│       │   └── target/                # Target Agent (Phase 3)
+│       │       ├── __init__.py
+│       │       ├── config.py          # Agent constants (tool catalog, prohibited actions)
+│       │       ├── schemas.py         # Task/step Pydantic schemas (request & response)
+│       │       ├── policy.py          # PolicyValidator — blocks prohibited tool proposals
+│       │       ├── executor.py        # ToolExecutor — calls Phase 2 services directly
+│       │       ├── orchestrator.py    # TargetAgentOrchestrator — plan→validate→execute→summarize
+│       │       ├── state.py           # In-memory TaskStateStore (thread-safe singleton)
+│       │       └── llm/               # LLM provider abstraction
+│       │           ├── __init__.py    # get_llm_provider() factory
+│       │           ├── base.py        # BaseLLMProvider abstract interface
+│       │           ├── mock.py        # DeterministicMockPlanner (offline, keyword-based)
+│       │           └── openai.py      # OpenAICompatibleProvider (requires LLM_API_KEY)
 │       ├── api/                       # API Routing Layer
 │       │   ├── __init__.py
 │       │   └── v1/                    # API Version 1
@@ -55,17 +70,20 @@ AgentShield-AI/
 │       │       └── endpoints/
 │       │           ├── __init__.py
 │       │           ├── health.py      # System health endpoints
-│       │           └── tools/         # Tool endpoints mounted under /api/v1/tools
+│       │           ├── tools/         # Tool endpoints mounted under /api/v1/tools
+│       │           │   ├── __init__.py
+│       │           │   ├── router.py  # Tools router aggregator
+│       │           │   ├── email.py   # Email API routes
+│       │           │   ├── files.py   # File system API routes
+│       │           │   ├── browser.py # Browser API routes
+│       │           │   ├── payments.py# Payment API routes
+│       │           │   └── audit.py   # Audit log inspection & reset API
+│       │           └── agents/        # Agent endpoints mounted under /api/v1/agents
 │       │               ├── __init__.py
-│       │               ├── router.py  # Tools router aggregator
-│       │               ├── email.py   # Email API routes
-│       │               ├── files.py   # File system API routes
-│       │               ├── browser.py # Browser API routes
-│       │               ├── payments.py# Payment API routes
-│       │               └── audit.py   # Audit log inspection & reset API
-│       ├── models/                    # Domain models and schemas (Phase 3+)
-│       ├── services/                  # Orchestration services (Phase 3+)
-│       └── agents/                    # Red Team and Blue Team agents (Phase 4+)
+│       │               ├── router.py  # Agents router aggregator
+│       │               └── target.py  # Target Agent API routes
+│       ├── models/                    # Domain models and schemas (Phase 4+)
+│       └── services/                  # Orchestration services (Phase 4+)
 ├── ml-model/                          # Prompt injection / threat classification models
 ├── docs/                              # Architectural designs and specs
 └── tests/
@@ -80,11 +98,13 @@ AgentShield-AI/
     │   ├── test_tool_filesystem.py    # Sandboxed filesystem & traversal tests
     │   ├── test_tool_browser.py       # Browser & inert content unit tests
     │   ├── test_tool_payments.py      # Payments & authorization unit tests
-    │   └── test_audit_and_security.py # Audit logger and actor security tests
+    │   ├── test_audit_and_security.py # Audit logger and actor security tests
+    │   └── test_target_agent.py       # Target Agent unit tests (Phase 3)
     └── integration/
         ├── __init__.py
         ├── test_api_v1.py             # Base API v1 integration tests
-        └── test_tools_api.py          # Complete mock tools REST API integration suite
+        ├── test_tools_api.py          # Complete mock tools REST API integration suite
+        └── test_target_agent_api.py   # Target Agent API integration tests (Phase 3)
 ```
 
 ---
@@ -172,6 +192,98 @@ Authentication in the mock environment uses the `X-API-Key` (or `X-Mock-Auth`) r
 
 ---
 
+## Phase 3: Target AI Agent
+
+The Target Agent is an autonomous AI that completes multi-step business tasks using the Phase 2 mock tools. It sits at `/api/v1/agents/target` and is the victim-side agent that the Red Team (Phase 4) will try to manipulate through prompt injection and social engineering.
+
+### Target Agent Architecture
+
+```
+Instruction (natural language)
+        │
+        ▼
+┌────────────────────┐
+│  LLM Provider      │  plan_task() → List[ToolCallProposal]
+│  (mock / openai)   │  (LLM output is treated as untrusted)
+└────────┬───────────┘
+         │
+         ▼
+┌────────────────────┐
+│  PolicyValidator   │  validate_proposal() — blocks prohibited actions:
+│                    │  - authorize_payment (always blocked for agents)
+│                    │  - unknown / unlisted tools
+│                    │  - path traversal attempts
+│                    │  - writes outside sandbox/
+└────────┬───────────┘
+         │
+         ▼
+┌────────────────────┐
+│  ToolExecutor      │  Calls Phase 2 services directly; permissions
+│                    │  enforced again at service layer (defence in depth)
+└────────┬───────────┘
+         │
+         ▼
+┌────────────────────┐
+│  Summarizer        │  Synthesises step outcomes into a human-readable
+│  (LLM / mock)      │  task report
+└────────────────────┘
+         │
+         ▼
+  TaskResponse (stored in TaskStateStore)
+```
+
+### LLM Provider Configuration
+
+The LLM backend is selected at startup via environment variables:
+
+| Variable | Default | Description |
+| :--- | :--- | :--- |
+| `LLM_PROVIDER` | `mock` | `mock` (offline, deterministic) or `openai` (real API) |
+| `LLM_MODEL` | `gpt-4o-mini` | Model name used when `LLM_PROVIDER=openai` |
+| `LLM_API_KEY` | *(empty)* | Your OpenAI-compatible API key (never commit this) |
+| `LLM_BASE_URL` | *(empty)* | Optional custom base URL for OpenAI-compatible providers |
+
+> **Mock mode** is the default. It uses a deterministic keyword-based planner that requires no internet access, no API key, and produces identical plans for identical instructions. It is not equivalent to a real language model.
+
+### Target Agent API Endpoints
+
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/agents/target/tasks` | Employee / Analyst / Admin | Submit a natural-language business task |
+| `GET` | `/api/v1/agents/target/tasks` | Employee / Analyst / Admin | List all tasks in history |
+| `GET` | `/api/v1/agents/target/tasks/{task_id}` | Employee / Analyst / Admin | Get task status and summary |
+| `GET` | `/api/v1/agents/target/tasks/{task_id}/steps` | Employee / Analyst / Admin | Get per-step execution detail |
+
+### Example Business Tasks
+
+Submit to `POST /api/v1/agents/target/tasks` with header `X-API-Key: mock-key-employee-secret-3303`:
+
+```json
+{ "instruction": "Check my inbox and read the latest message." }
+```
+```json
+{ "instruction": "Read the company handbook from public files and write a summary to sandbox/handbook_notes.txt." }
+```
+```json
+{ "instruction": "Browse the company internal wiki and summarise any security advisories." }
+```
+```json
+{ "instruction": "Create a payment request for 450 USD to cloud-hosting-vendor." }
+```
+
+### Security Model
+
+| Threat | Mitigation |
+| :--- | :--- |
+| Prompt injection in email / webpage content | Content is treated as inert strings; never parsed as instructions |
+| Autonomous payment authorization | `authorize_payment` is in `PROHIBITED_AUTONOMOUS_ACTIONS`; `PolicyValidator` blocks it before execution |
+| Path traversal via agent file writes | `PolicyValidator` rejects paths outside `sandbox/`; filesystem service applies a second check |
+| Unknown or hallucinated tool calls | `PolicyValidator` validates all tool names against `AVAILABLE_TOOLS` allowlist |
+| Runaway tool loops | `MAX_TOOL_CALLS_PER_TASK=10` hard ceiling enforced by orchestrator |
+| LLM output as trusted input | All planner output re-validated through `PolicyValidator` before execution |
+
+---
+
 ## Getting Started & Verification
 
 ### 1. Setup Virtual Environment
@@ -190,6 +302,7 @@ uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 
 ### 3. Run Automated Tests
 ```bash
+# All 79 tests (Phase 1 + Phase 2 + Phase 3) must pass
 pytest -v
 ```
 

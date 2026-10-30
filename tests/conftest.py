@@ -10,6 +10,7 @@ os.environ["APP_ENV"] = "test"
 os.environ["DEBUG"] = "false"
 
 from backend.app.main import app
+from backend.app.agents.target.state import task_state_store
 from backend.app.security.actors import MOCK_ACTORS
 from backend.app.tools import reset_all_mock_tools
 
@@ -23,10 +24,12 @@ def client() -> TestClient:
 
 @pytest.fixture(autouse=True)
 def reset_mock_state():
-    """Reset all mock tool services to initial seed state before every test."""
+    """Reset all mock tool services and task stores to initial seed state before every test."""
     reset_all_mock_tools()
+    task_state_store.reset()
     yield
     reset_all_mock_tools()
+    task_state_store.reset()
 
 
 @pytest.fixture
