@@ -1,18 +1,16 @@
-"""Attack Dispatcher — submits adversarial payloads to the Target Agent API.
-
-The dispatcher exclusively uses the FastAPI TestClient (for tests) or a real
-httpx client (for live server mode). It NEVER calls Phase 2 tool services directly.
+"""Attack Dispatcher — submits adversarial payloads to the Target Agent API or directly in-process.
 
 Security constraints:
-  - Always authenticates as UNTRUSTED_AGENT (lowest privilege).
-  - Submits to /api/v1/agents/target/tasks only.
+  - Always authenticates as UNTRUSTED_AGENT or the configured victim actor.
+  - Submits to /api/v1/agents/target/tasks (HTTP) or TargetAgentOrchestrator.run_task (in-process).
   - Returns raw TaskResponse data as a dict; does NOT interpret tool output as instructions.
   - The adversarial payload is submitted as the 'instruction' string — never executed.
 """
 
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from fastapi.testclient import TestClient
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 from backend.app.agents.redteam.config import (
     REDTEAM_ACTOR_API_KEY,
@@ -28,18 +26,17 @@ class DispatchError(Exception):
 
 
 class AttackDispatcher:
-    """Submits adversarial payloads to the Target Agent via its HTTP API.
+    """Submits adversarial payloads to the Target Agent via HTTP or in-process.
 
     Args:
-        client: A FastAPI TestClient bound to the running application.
-                Injected so tests can share the same client fixture.
+        client: Optional FastAPI TestClient bound to the running application (for tests).
         target_actor_key: The API key the Target Agent will act as (the victim actor).
-                          Defaults to the UNTRUSTED_AGENT key.
+                          Defaults to the REDTEAM_ACTOR_API_KEY.
     """
 
     def __init__(
         self,
-        client: TestClient,
+        client: Optional[TestClient] = None,
         target_actor_key: Optional[str] = None,
     ) -> None:
         self._client = client
@@ -48,8 +45,53 @@ class AttackDispatcher:
         # but the payload instructs the Target Agent with the victim key.
         self._target_actor_key = target_actor_key or REDTEAM_ACTOR_API_KEY
 
+    async def submit_attack_async(self, payload: str, attack_id: str) -> Dict[str, Any]:
+        """Submit an adversarial instruction asynchronously directly to the Target Agent in-process.
+
+        Avoids nested TestClient lifecycles, event loop deadlocks, and ECONNRESET errors
+        when running inside an active ASGI server like Uvicorn.
+        """
+        logger.info(
+            "Dispatching attack %s -> Target Agent in-process (victim key: %s...)",
+            attack_id,
+            self._target_actor_key[:12],
+        )
+
+        if self._client is not None:
+            return self.submit_attack(payload, attack_id)
+
+        from backend.app.agents.target.orchestrator import TargetAgentOrchestrator
+        from backend.app.agents.target.schemas import TaskSubmissionRequest
+        from backend.app.security.actors import get_mock_actor
+
+        victim_actor = get_mock_actor(self._target_actor_key)
+        if not victim_actor or not (
+            victim_actor.has_permission("agent:submit") or victim_actor.has_permission("*")
+        ):
+            logger.warning(
+                "Target actor %s lacks 'agent:submit' permission — rejecting at auth boundary.",
+                getattr(victim_actor, "actor_id", "unknown"),
+            )
+            return {
+                "http_status": 403,
+                "body": {"detail": "Actor lacks permission 'agent:submit'"},
+                "raw_text": "Forbidden: actor lacks agent:submit",
+            }
+
+        try:
+            task_req = TaskSubmissionRequest(instruction=payload)
+            task_res = await TargetAgentOrchestrator.run_task(actor=victim_actor, request=task_req)
+            return {
+                "http_status": 201,
+                "body": task_res.model_dump(),
+                "raw_text": task_res.model_dump_json(),
+            }
+        except Exception as exc:
+            logger.exception("Target Agent execution error during attack %s: %s", attack_id, exc)
+            raise DispatchError(f"Target Agent execution failed: {exc}") from exc
+
     def submit_attack(self, payload: str, attack_id: str) -> Dict[str, Any]:
-        """Submit an adversarial instruction to the Target Agent and return the raw response dict.
+        """Submit an adversarial instruction to the Target Agent via TestClient and return raw response dict.
 
         Args:
             payload: Adversarial natural-language instruction (inert string — never executed).
@@ -61,6 +103,9 @@ class AttackDispatcher:
         Raises:
             DispatchError: If the HTTP response indicates an unexpected server error (5xx).
         """
+        if self._client is None:
+            raise DispatchError("Cannot call synchronous submit_attack without an injected TestClient fixture.")
+
         logger.info(
             "Dispatching attack %s → Target Agent (victim key: %s...)",
             attack_id,
@@ -96,4 +141,3 @@ class AttackDispatcher:
             "body": response.json() if response.status_code < 400 else {},
             "raw_text": response.text,
         }
-

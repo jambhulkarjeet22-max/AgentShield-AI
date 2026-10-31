@@ -8,7 +8,6 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.app.api.v1.endpoints.health import HealthResponse, get_health
 from backend.app.api.v1.router import api_v1_router
@@ -19,41 +18,51 @@ from backend.app.core.logging import get_logger, setup_logging
 logger = get_logger("agentshield.main")
 
 
-class RequestLoggingMiddleware(BaseHTTPMiddleware):
-    """Middleware for structured request and latency logging."""
+class RequestLoggingMiddleware:
+    """Pure ASGI middleware for structured request and latency logging."""
 
-    async def dispatch(self, request: Request, call_next) -> Response:
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
         start_time = time.perf_counter()
-        response: Response = await call_next(request)
-        process_time_ms = (time.perf_counter() - start_time) * 1000
 
-        # Inject latency header
-        response.headers["X-Process-Time-Ms"] = f"{process_time_ms:.2f}"
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                process_time_ms = (time.perf_counter() - start_time) * 1000
+                headers = list(message.get("headers", []))
+                headers.append((b"x-process-time-ms", f"{process_time_ms:.2f}".encode()))
+                message["headers"] = headers
 
-        # Avoid polluting logs for repetitive health check probes in non-debug mode
-        is_health = request.url.path.endswith("/health")
-        if not is_health or settings.DEBUG:
-            logger.info(
-                "HTTP %s %s completed %d in %.2fms",
-                request.method,
-                request.url.path,
-                response.status_code,
-                process_time_ms,
-                extra={
-                    "method": request.method,
-                    "path": request.url.path,
-                    "status_code": response.status_code,
-                    "duration_ms": round(process_time_ms, 2),
-                },
-            )
+                path = scope.get("path", "")
+                is_health = path.endswith("/health")
+                if not is_health or settings.DEBUG:
+                    status_code = message.get("status", 200)
+                    logger.info(
+                        "HTTP %s %s completed %d in %.2fms",
+                        scope.get("method", "GET"),
+                        path,
+                        status_code,
+                        process_time_ms,
+                        extra={
+                            "method": scope.get("method", "GET"),
+                            "path": path,
+                            "status_code": status_code,
+                            "duration_ms": round(process_time_ms, 2),
+                        },
+                    )
+            await send(message)
 
-        return response
+        await self.app(scope, receive, send_wrapper)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan management for startup and graceful shutdown."""
-    # Startup
     setup_logging(log_level=settings.LOG_LEVEL, log_format=settings.LOG_FORMAT)
     logger.info(
         "Starting %s v%s in %s environment (debug=%s)",
@@ -62,8 +71,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         settings.APP_ENV,
         settings.DEBUG,
     )
+    # Ensure database schema is initialized (SQLite zero-config fallback or relational DB)
+    try:
+        from backend.app.db.base import Base
+        import backend.app.db.models  # noqa: F401 - registers all SQLAlchemy models
+        from backend.app.db.session import get_engine
+        engine = get_engine()
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database schema verified and tables initialized successfully.")
+    except Exception as exc:
+        logger.warning("Database table initialization check: %s", exc)
+
     yield
-    # Shutdown
     logger.info("Shutting down %s", settings.APP_NAME)
 
 
@@ -140,4 +159,3 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG,
     )
-

@@ -88,7 +88,8 @@ class CampaignRequest(BaseModel):
         min_length=1,
         description="Which attack categories to include in this campaign",
     )
-    target_actor_key: str = Field(
+    target_actor_key: Optional[str] = Field(
+        default="mock-key-employee-secret-3303",
         description="Mock API key the Target Agent will execute tasks under (the victim actor)",
     )
     description: Optional[str] = Field(

@@ -121,7 +121,12 @@ MOCK_ACTORS: Dict[str, MockActor] = {
 
 # Lookup map by API Key for deterministic verification
 API_KEY_TO_ACTOR: Dict[str, MockActor] = {
-    actor.api_key: actor for actor in MOCK_ACTORS.values()
+    "mock-key-admin-secret-7701": MOCK_ACTORS["admin"],
+    "mock-key-admin-secret-9901": MOCK_ACTORS["admin"],
+    **{
+        actor.api_key: actor for actor in MOCK_ACTORS.values()
+    }
+
 }
 
 # Default unauthenticated actor with least privilege

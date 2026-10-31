@@ -72,6 +72,15 @@ class MLClient:
             self.timeout_seconds = settings.ML_SERVICE_TIMEOUT_SECONDS
         self.transport = transport
         self._circuit_open_until: float = 0.0
+        self._client: Optional[httpx.Client] = None
+
+    def _get_client(self) -> httpx.Client:
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.Client(
+                timeout=httpx.Timeout(self.timeout_seconds),
+                transport=self.transport,
+            )
+        return self._client
 
     def reset_circuit_breaker(self) -> None:
         """Reset circuit breaker to attempt live queries immediately."""
@@ -89,6 +98,13 @@ class MLClient:
                 available=False,
                 label="DISABLED",
                 fallback_reason="ML service is disabled in application configuration.",
+            )
+
+        if settings.is_testing and self.transport is None:
+            return MLInferenceResult(
+                available=False,
+                label="UNAVAILABLE",
+                fallback_reason="ML service offline during unit testing.",
             )
 
         now = time.time()
@@ -113,14 +129,11 @@ class MLClient:
         target_url = f"{self.base_url}/predict"
 
         try:
-            with httpx.Client(
-                timeout=httpx.Timeout(self.timeout_seconds),
-                transport=self.transport,
-            ) as client:
-                response = client.post(
-                    target_url,
-                    json={"text": text},
-                )
+            client = self._get_client()
+            response = client.post(
+                target_url,
+                json={"text": text},
+            )
 
             latency = round((time.perf_counter() - start_time) * 1000, 2)
 

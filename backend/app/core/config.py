@@ -26,17 +26,17 @@ class Settings(BaseSettings):
     # Network & Server
     HOST: str = Field(default="127.0.0.1", description="Server host binding")
     PORT: int = Field(default=8000, description="Server port")
-
-    # Database & Storage (PostgreSQL with SQLAlchemy 2.0)
-    POSTGRES_USER: str = Field(default="agentshield", description="PostgreSQL database username")
-    POSTGRES_PASSWORD: str = Field(default="agentshield_secret", description="PostgreSQL database password")
-    POSTGRES_HOST: str = Field(default="localhost", description="PostgreSQL host")
-    POSTGRES_PORT: int = Field(default=5432, description="PostgreSQL port")
-    POSTGRES_DB: str = Field(default="agentshield_db", description="PostgreSQL database name")
+    # Database & Storage (Convex Cloud Database & SQLite/PostgreSQL)
+    CONVEX_URL: Optional[str] = Field(default=None, description="Convex Cloud deployment URL")
     DATABASE_URL: str = Field(
-        default="postgresql+psycopg://agentshield:agentshield_secret@localhost:5432/agentshield_db",
-        description="Primary PostgreSQL database connection URL (postgresql+psycopg://)",
+        default="sqlite:///./agentshield.db",
+        description="Database connection URL (defaults to zero-config SQLite)",
     )
+    POSTGRES_USER: Optional[str] = Field(default="agentshield", description="Optional PostgreSQL username")
+    POSTGRES_PASSWORD: Optional[str] = Field(default=None, description="Optional PostgreSQL password")
+    POSTGRES_HOST: Optional[str] = Field(default="localhost", description="Optional PostgreSQL host")
+    POSTGRES_PORT: Optional[int] = Field(default=5432, description="Optional PostgreSQL port")
+    POSTGRES_DB: Optional[str] = Field(default="agentshield_db", description="Optional PostgreSQL db name")
     DATABASE_POOL_SIZE: int = Field(default=10, description="SQLAlchemy connection pool size")
     DATABASE_MAX_OVERFLOW: int = Field(default=20, description="SQLAlchemy connection pool max overflow")
     DATABASE_ECHO: bool = Field(default=False, description="Log generated SQL statements")

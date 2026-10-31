@@ -57,3 +57,7 @@ dist/
 # Temporary files
 *.tmp
 *.bak
+
+# Next.js build cache
+.next/
+frontend/.next/

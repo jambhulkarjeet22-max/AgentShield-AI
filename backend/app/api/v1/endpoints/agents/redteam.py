@@ -3,7 +3,6 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, status
-from fastapi.testclient import TestClient
 
 from backend.app.agents.redteam.orchestrator import RedTeamOrchestrator
 from backend.app.agents.redteam.planner import AttackPlanner
@@ -20,17 +19,6 @@ from backend.app.security.actors import MockActor, get_current_actor, require_pe
 router = APIRouter(prefix="/redteam", tags=["AI Agent: Red Team Agent"])
 
 
-def _get_test_client() -> TestClient:
-    """Create a TestClient bound to the running FastAPI application.
-
-    The Red Team uses this to submit adversarial tasks to the Target Agent's HTTP
-    API. Using TestClient keeps the call in-process (no real network socket) while
-    exercising the full middleware and routing stack — the same as integration tests.
-    """
-    from backend.app.main import app as fastapi_app
-    return TestClient(fastapi_app, raise_server_exceptions=False)
-
-
 @router.post(
     "/campaigns",
     response_model=CampaignResponse,
@@ -44,17 +32,15 @@ def _get_test_client() -> TestClient:
         "The UNTRUSTED_AGENT actor cannot launch campaigns."
     ),
 )
-def launch_campaign(
+async def launch_campaign(
     payload: CampaignRequest,
     actor: MockActor = Depends(require_permission("agent:submit")),
 ) -> CampaignResponse:
-    """Launch an adversarial campaign and return the full result synchronously."""
-    with _get_test_client() as client:
-        return RedTeamOrchestrator.run_campaign(
-            actor=actor,
-            request=payload,
-            client=client,
-        )
+    """Launch an adversarial campaign and return the full result asynchronously."""
+    return await RedTeamOrchestrator.run_campaign_async(
+        actor=actor,
+        request=payload,
+    )
 
 
 @router.get(

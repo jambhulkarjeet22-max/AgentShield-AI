@@ -4,6 +4,8 @@ Intercepts Target Agent tool proposals between PolicyValidator and ToolExecutor,
 enforcing intent verification, multi-signal anomaly detection, and risk scoring.
 """
 
+import uuid
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from backend.app.agents.guardian.approvals import approval_store
@@ -59,6 +61,22 @@ class BlueTeamGuardian:
             verdict=verdict,
         )
 
+        # Sync decision to Convex Cloud DB if configured
+        try:
+            from backend.app.db.convex_client import convex_client
+            convex_client.sync_decision({
+                "decision_id": f"dec-{uuid.uuid4().hex[:12]}",
+                "task_id": task_id,
+                "step_number": step_number,
+                "verdict": verdict.verdict.value,
+                "risk_score": verdict.risk_score,
+                "explanation": verdict.explanation or "",
+                "signals": [s.model_dump() for s in verdict.signals_triggered],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            })
+        except Exception:
+            pass
+
         # Audit event
         audit_status = (
             "ALLOWED" if verdict.verdict == GuardianDecision.ALLOW
@@ -99,4 +117,3 @@ class BlueTeamGuardian:
             proposal=proposal,
             verdict=verdict,
         )
-

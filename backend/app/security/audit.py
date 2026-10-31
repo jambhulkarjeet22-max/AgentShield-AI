@@ -15,6 +15,7 @@ class AuditLogEntry(BaseModel):
     """Structured audit record for all mock tool actions."""
 
     id: str = Field(default_factory=lambda: f"audit-{uuid.uuid4().hex[:12]}")
+    event_id: str = Field(default="")
     timestamp: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat(),
         description="ISO-8601 UTC timestamp",
@@ -26,6 +27,10 @@ class AuditLogEntry(BaseModel):
     resource: str = Field(description="Target resource identifier or path")
     status: str = Field(description="Execution result: ALLOWED, DENIED, or FAILED")
     details: Dict[str, Any] = Field(default_factory=dict, description="Sanitized contextual metadata")
+
+    def model_post_init(self, __context: Any) -> None:
+        if not self.event_id:
+            self.event_id = self.id
 
 
 class AuditService:
@@ -57,6 +62,23 @@ class AuditService:
         )
         with self._lock:
             self._logs.append(entry)
+
+        # Stream event to Convex Cloud DB if configured
+        try:
+            from backend.app.db.convex_client import convex_client
+            convex_client.sync_audit_log({
+                "event_id": entry.id,
+                "timestamp": entry.timestamp,
+                "actor_id": entry.actor_id,
+                "role": entry.role,
+                "tool": entry.tool,
+                "action": entry.action,
+                "status": entry.status,
+                "resource": entry.resource,
+                "details": entry.details,
+            })
+        except Exception:
+            pass
 
         # Also emit to application structured logger
         logger.info(
@@ -115,4 +137,3 @@ class AuditService:
 
 # Global audit service singleton
 audit_service = AuditService()
-

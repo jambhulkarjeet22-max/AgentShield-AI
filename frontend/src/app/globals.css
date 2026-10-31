@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://db.onlinewebfonts.com/c/e55e9079ee863276569c8a68d776ef04?family=Futura+Md+BT+Medium');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root,
+  .dark {
+    /* Primary Dark Theme (Coolors: #101f3d, #19365c, #345a85, #5d91b5, #f5f7fa) */
+    --background: 220 58% 15%;        /* #101f3d Deep Prussian Navy */
+    --foreground: 216 38% 97%;         /* #f5f7fa Ghost / Ice White */
+    --card: 214 57% 23%;               /* #19365c Dark Blue Gray */
+    --card-foreground: 216 38% 97%;    /* #f5f7fa */
+    --popover: 214 57% 23%;            /* #19365c */
+    --popover-foreground: 216 38% 97%; /* #f5f7fa */
+    --primary: 205 45% 54%;            /* #5d91b5 Steel Cerulean */
+    --primary-foreground: 220 58% 12%; /* #101f3d Dark contrast */
+    --secondary: 212 44% 36%;          /* #345a85 Slate Steel Blue */
+    --secondary-foreground: 216 38% 97%;/* #f5f7fa */
+    --muted: 214 45% 20%;              /* Dark Muted Blue */
+    --muted-foreground: 208 25% 75%;   /* Readable Muted Text */
+    --accent: 212 44% 36%;             /* #345a85 */
+    --accent-foreground: 216 38% 97%;  /* #f5f7fa */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 216 38% 97%;
+    --border: 212 40% 32%;             /* #345a85 Steel Border */
+    --input: 212 40% 32%;              /* #345a85 */
+    --ring: 205 50% 60%;               /* #5d91b5 Focus Ring */
+    --radius: 0.5rem;
+  }
+
+  .light {
+    /* Sage / Forest Light Theme (Coolors: #dad7cd, #a3b18a, #588157, #3a5a40, #344e41) */
+    --background: 46 16% 86%;         /* #dad7cd Light Timberwolf Sage Canvas */
+    --foreground: 150 20% 25%;         /* #344e41 Deep Pine Dark Typography */
+    --card: 46 22% 94%;                /* Elevated crisp sage card */
+    --card-foreground: 150 20% 25%;    /* #344e41 */
+    --popover: 46 22% 94%;             /* #dad7cd tint */
+    --popover-foreground: 150 20% 25%; /* #344e41 */
+    --primary: 119 22% 42%;            /* #588157 Fern Forest Green */
+    --primary-foreground: 46 25% 96%;  /* Light text on green button */
+    --secondary: 82 22% 62%;           /* #a3b18a Pale Sage */
+    --secondary-foreground: 150 20% 25%;/* #344e41 */
+    --muted: 82 20% 78%;               /* Soft muted sage */
+    --muted-foreground: 131 22% 35%;   /* #3a5a40 Hunter Green */
+    --accent: 82 22% 65%;              /* #a3b18a */
+    --accent-foreground: 150 20% 25%;  /* #344e41 */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 82 22% 60%;              /* #a3b18a Sage Border */
+    --input: 82 22% 60%;               /* #a3b18a */
+    --ring: 119 22% 42%;               /* #588157 Focus Ring */
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(16, 31, 61, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(93, 145, 181, 0.4);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(93, 145, 181, 0.7);
+}
+
+/* Dedicated Scroller for Terminal & JSON Records */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(93, 145, 181, 0.45) rgba(16, 31, 61, 0.7);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(16, 31, 61, 0.7);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(93, 145, 181, 0.45);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(93, 145, 181, 0.75);
+}
+
+/* Light Theme Scrollbars */
+.light ::-webkit-scrollbar-track {
+  background: rgba(218, 215, 205, 0.6);
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(88, 129, 87, 0.45);
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(88, 129, 87, 0.75);
+}
+
+.light .custom-scrollbar {
+  scrollbar-color: rgba(88, 129, 87, 0.45) rgba(218, 215, 205, 0.7);
+}
+
+.light .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(218, 215, 205, 0.7);
+}
+
+.light .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(88, 129, 87, 0.45);
+}
+
+.light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(88, 129, 87, 0.75);
+}
+
