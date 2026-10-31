@@ -1,4 +1,4 @@
-# Standalone dependencies for AgentShield-AI ML Prompt Injection Model
+# Standalone dependencies for Agentra-AI ML Prompt Injection Model
 pandas>=2.2.0
 scikit-learn>=1.4.0
 numpy>=1.26.0

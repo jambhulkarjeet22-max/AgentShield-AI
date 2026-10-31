@@ -8,7 +8,7 @@ from fastapi import Header, Request
 from backend.app.core.exceptions import AuthenticationError, SecurityError
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.security.actors")
+logger = get_logger("agentra.security.actors")
 
 
 class Role(str, Enum):

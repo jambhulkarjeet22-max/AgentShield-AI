@@ -1,6 +1,6 @@
 # Technical Requirements Document (TRD)
 
-## Project: AgentShield AI
+## Project: Agentra AI
 **Technical Architecture, Component Design, Data Contracts & Infrastructure Specification**
 
 | Attribute | Specification |
@@ -400,7 +400,7 @@ frontend/src/app/
 
 ## 7. Security Architecture & Threat Vectors
 
-| Threat ID | Threat Vector | OWASP LLM Ref | AgentShield Architectural Defense |
+| Threat ID | Threat Vector | OWASP LLM Ref | Agentra Architectural Defense |
 | :--- | :--- | :--- | :--- |
 | **TV-01** | Direct System Prompt Override | LLM01 | Inert content isolation: instructions inside file/email bodies are not ingested as top-level planner instructions. |
 | **TV-02** | Indirect Web Prompt Injection | LLM01 | Air-gapped browser treats HTML/forum text as untrusted string literals; secondary actions are rejected. |

@@ -3,7 +3,7 @@
 Executes:
 1. Prompts securely for PostgreSQL password without echoing to terminal or chat.
 2. Generates the git-ignored .env configuration with psycopg v3 driver URL.
-3. Tests live connection to localhost:5432 / agentshield_db with SQLAlchemy 2.0.
+3. Tests live connection to localhost:5432 / agentra_db with SQLAlchemy 2.0.
 4. Executes Alembic migrations against the real PostgreSQL database.
 5. Verifies all 7 normalized tables exist in PostgreSQL.
 6. Executes real CRUD transactions across all tables and cleans up test records.
@@ -23,7 +23,7 @@ if PROJECT_ROOT not in sys.path:
 
 def main():
     print("=" * 70)
-    print("AgentShield AI — Phase 7.1 Real PostgreSQL Verification")
+    print("Agentra AI — Phase 7.1 Real PostgreSQL Verification")
     print("=" * 70)
 
     # 1. Obtain password securely
@@ -44,14 +44,14 @@ def main():
     user = os.environ.get("POSTGRES_USER", "postgres")
     host = os.environ.get("POSTGRES_HOST", "localhost")
     port = int(os.environ.get("POSTGRES_PORT", 5432))
-    db_name = os.environ.get("POSTGRES_DB", "agentshield_db")
+    db_name = os.environ.get("POSTGRES_DB", "agentra_db")
 
     db_url = f"postgresql+psycopg://{user}:{encoded_pw}@{host}:{port}/{db_name}"
 
     # 2. Write or update .env file
     env_path = os.path.join(PROJECT_ROOT, ".env")
-    env_content = f"""# AgentShield AI Local Environment Configuration
-APP_NAME=AgentShield-AI
+    env_content = f"""# Agentra AI Local Environment Configuration
+APP_NAME=Agentra-AI
 APP_ENV=development
 DEBUG=false
 API_V1_PREFIX=/api/v1
@@ -110,7 +110,7 @@ LOG_LEVEL=INFO
         print(f"    Error: {exc}")
         print("\nPlease verify that:")
         print("1. PostgreSQL service is running on port 5432.")
-        print(f"2. Database '{db_name}' exists (created via: CREATE DATABASE agentshield_db;).")
+        print(f"2. Database '{db_name}' exists (created via: CREATE DATABASE agentra_db;).")
         print("3. Password provided is correct.")
         sys.exit(1)
 
@@ -317,7 +317,7 @@ LOG_LEVEL=INFO
             role="ANALYST",
             tool="database_verifier",
             action="verify_crud",
-            resource="postgresql/agentshield_db",
+            resource="postgresql/agentra_db",
             status="ALLOWED",
             details={"verification": "Phase 7.1"},
         )
@@ -355,7 +355,7 @@ LOG_LEVEL=INFO
 
     print("\n" + "=" * 70)
     print("SUCCESS: Phase 7.1 Real PostgreSQL verification completed 100% successfully!")
-    print("All 7 tables migrated and verified in PostgreSQL database 'agentshield_db'.")
+    print("All 7 tables migrated and verified in PostgreSQL database 'agentra_db'.")
     print("=" * 70)
 
 

@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentshield-ai"
+name = "agentra-ai"
 version = "0.1.0"
-description = "AgentShield AI - Autonomous Multi-Agent Cybersecurity Defence System (Red Team vs Blue Team)"
+description = "Agentra AI - Autonomous Multi-Agent Cybersecurity Defence System (Red Team vs Blue Team)"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
-    { name = "AgentShield AI Team" }
+    { name = "Agentra AI Team" }
 ]
 dependencies = [
     "fastapi>=0.110.0,<1.0.0",

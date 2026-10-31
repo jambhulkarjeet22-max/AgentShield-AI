@@ -231,11 +231,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main 3D Holographic Globe Panel */}
+      {/* Main 3D Cyber Threat Globe Panel (Kaspersky & Radware Inspired) */}
       <div className="flex flex-col gap-3">
         <HolographicGlobe
           modelUrl="/models/earth_hologram.glb"
           autoRotate={true}
+          events={recentLogs}
+          campaigns={campaigns}
+          decisions={restDecisions}
+          isLive={isConvexLive}
         />
 
         {/* Agent Identity Indicators Legend */}
@@ -388,36 +392,6 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Cyber Arena Call-to-Action */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border border-blue-500/20 bg-blue-950/10">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center">
-            <Swords className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold text-foreground">
-              Cyber Arena 3D Battlefield
-            </h4>
-            <p className="text-xs text-muted-foreground">
-              Watch real-time Red vs Blue multi-agent activity in the visual arena.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/learning"
-            className="inline-flex items-center justify-center font-medium transition-all h-8 px-3 text-xs rounded-md border border-border bg-transparent hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
-          >
-            View Learning Progress
-          </Link>
-          <Link
-            href="/arena"
-            className="inline-flex items-center justify-center font-medium transition-all h-8 px-3 text-xs rounded-md bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-500/20 active:scale-[0.98]"
-          >
-            Enter Cyber Arena
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }

@@ -33,7 +33,7 @@ from backend.app.core.logging import get_logger
 from backend.app.security.actors import MockActor
 from backend.app.services.ml_client import MLClient
 
-logger = get_logger("agentshield.agents.guardian.scorer")
+logger = get_logger("agentra.agents.guardian.scorer")
 
 
 class RiskScorer:

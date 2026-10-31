@@ -1,4 +1,4 @@
-"""Model training pipeline for AgentShield-AI Prompt Injection Detection.
+"""Model training pipeline for Agentra-AI Prompt Injection Detection.
 
 Trains:
 1. TfidfVectorizer (unigram + bigram text representation).
@@ -103,7 +103,7 @@ def save_artifacts(
 
 def main():
     print("=================================================================")
-    print("AgentShield-AI ML Model Training")
+    print("Agentra-AI ML Model Training")
     print("=================================================================")
     vectorizer, base_model, calibrated_model = train_pipeline()
     save_artifacts(vectorizer, base_model, calibrated_model)

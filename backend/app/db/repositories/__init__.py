@@ -1,4 +1,4 @@
-"""Export database repositories for AgentShield AI."""
+"""Export database repositories for Agentra AI."""
 
 from backend.app.db.repositories.audit_repo import AuditRepository
 from backend.app.db.repositories.campaign_repo import CampaignRepository

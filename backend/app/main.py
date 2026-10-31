@@ -1,4 +1,4 @@
-"""AgentShield AI - FastAPI Application Entry Point.
+"""Agentra AI - FastAPI Application Entry Point.
 
 Autonomous Multi-Agent Cybersecurity Defence System (Red Team vs Blue Team).
 """
@@ -15,7 +15,7 @@ from backend.app.core.config import settings
 from backend.app.core.exceptions import register_exception_handlers
 from backend.app.core.logging import get_logger, setup_logging
 
-logger = get_logger("agentshield.main")
+logger = get_logger("agentra.main")
 
 
 class RequestLoggingMiddleware:
@@ -104,7 +104,7 @@ def create_app() -> FastAPI:
         title=settings.APP_NAME,
         version=settings.APP_VERSION,
         description=(
-            "AgentShield AI - Autonomous Multi-Agent Cybersecurity Defence System. "
+            "Agentra AI - Autonomous Multi-Agent Cybersecurity Defence System. "
             "Simulating dynamic Red Team vs Blue Team scenarios in isolated mock environments."
         ),
         lifespan=lifespan,

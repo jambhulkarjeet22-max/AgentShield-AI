@@ -111,7 +111,7 @@ export default function SecurityEventsPage() {
   });
 
   const handleExport = () => {
-    exportToCSV('agentshield-security-events', filtered);
+    exportToCSV('agentra-security-events', filtered);
   };
 
   return (

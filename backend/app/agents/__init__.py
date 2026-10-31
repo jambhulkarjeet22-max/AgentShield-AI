@@ -1,4 +1,4 @@
-"""Autonomous agents package for AgentShield AI."""
+"""Autonomous agents package for Agentra AI."""
 
 from backend.app.agents.target import (
     StepResult,

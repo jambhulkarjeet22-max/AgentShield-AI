@@ -1,4 +1,4 @@
-"""Unit tests for SQLAlchemy 2.0 ORM models, relationships, and constraints in AgentShield AI."""
+"""Unit tests for SQLAlchemy 2.0 ORM models, relationships, and constraints in Agentra AI."""
 
 import pytest
 from datetime import datetime, timezone

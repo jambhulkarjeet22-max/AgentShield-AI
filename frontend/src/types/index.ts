@@ -1,5 +1,5 @@
 /**
- * AgentShield Core TypeScript Type Definitions
+ * Agentra Core TypeScript Type Definitions
  * Exact mirrors of FastAPI backend schemas
  */
 
@@ -86,20 +86,28 @@ export type AttackCategory =
 
 export type AttackOutcome =
   | 'DEFENDED'
+  | 'DEFENCE_HELD'
   | 'BREACHED'
+  | 'ATTACK_SUCCESS'
+  | 'FAILED_TO_TRIGGER'
   | 'ERROR'
   | 'SKIPPED';
 
 export interface AttackResult {
   attack_id: string;
   name: string;
+  attack_name?: string;
   category: AttackCategory;
   payload: string;
   outcome: AttackOutcome;
   defended: boolean;
   defence_mechanism?: string;
+  mechanism?: string;
   task_id?: string;
+  target_task_id?: string;
+  evaluation_notes?: string;
   details?: Record<string, any>;
+  raw_step_data?: any[];
   timestamp: string;
 }
 
@@ -114,7 +122,11 @@ export interface CampaignResponse {
   total_attacks: number;
   attacks_landed: number;
   defences_held: number;
-  results: AttackResult[];
+  failed_to_trigger?: number;
+  errors?: number;
+  results?: AttackResult[];
+  attack_results?: AttackResult[];
+  summary?: string;
   started_at: string;
   completed_at?: string;
   target_actor_key_hint?: string;

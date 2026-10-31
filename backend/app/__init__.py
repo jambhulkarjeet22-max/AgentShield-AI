@@ -1,2 +1,2 @@
-"""AgentShield AI Application Package."""
+"""Agentra AI Application Package."""
 

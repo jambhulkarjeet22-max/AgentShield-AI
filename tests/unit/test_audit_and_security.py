@@ -38,7 +38,7 @@ def test_audit_log_recording_and_filtering():
     # 1. Email operation
     mock_email_service.send_message(
         actor=actor,
-        request=SendEmailRequest(recipient="lead@agentshield.test", subject="Test", body="Body"),
+        request=SendEmailRequest(recipient="lead@agentra.test", subject="Test", body="Body"),
     )
 
     # 2. Filesystem read operation
@@ -71,7 +71,7 @@ def test_global_reset_all_mock_tools():
     # Perform a mutation: add an email
     mock_email_service.send_message(
         actor=actor,
-        request=SendEmailRequest(recipient="reset-test@agentshield.test", subject="Pre-Reset", body="Data"),
+        request=SendEmailRequest(recipient="reset-test@agentra.test", subject="Pre-Reset", body="Data"),
     )
     assert mock_email_service.list_messages(actor, folder="sent").total >= 1
 

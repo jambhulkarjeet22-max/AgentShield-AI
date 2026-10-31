@@ -7,11 +7,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-logger = logging.getLogger("agentshield.exceptions")
+logger = logging.getLogger("agentra.exceptions")
 
 
 class AppException(Exception):
-    """Base application exception for AgentShield AI."""
+    """Base application exception for Agentra AI."""
 
     def __init__(
         self,

@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.audit")
+logger = get_logger("agentra.audit")
 
 
 class AuditLogEntry(BaseModel):

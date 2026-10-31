@@ -10,7 +10,7 @@ export default function LoginPage() {
           <ShieldAlert className="w-6 h-6" />
         </div>
         <span className="font-bold text-xl tracking-tight text-foreground">
-          AgentShield
+          Agentra
         </span>
       </Link>
       <SignIn fallbackRedirectUrl="/dashboard" />

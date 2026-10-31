@@ -587,31 +587,6 @@ export default function ArenaPage() {
         </Card>
       )}
 
-      {/* 5. Bottom Banner Card (Matching reference design) */}
-      <div className="p-4 rounded-xl border border-violet-500/20 bg-card/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-violet-600/20 border border-violet-500/35 text-violet-400 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.2)]">
-            <Shield className="w-5 h-5 text-violet-400" />
-          </div>
-          <div>
-            <h4 className="text-sm font-semibold text-foreground">Cyber Arena 3D Battlefield</h4>
-            <p className="text-xs text-muted-foreground">Experience the real-time AI security battle.</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/learning">
-            <Button variant="outline" size="sm" className="text-xs h-9">
-              View Learning Progress
-            </Button>
-          </Link>
-          <Link href="/runs">
-            <Button size="sm" className="text-xs h-9 bg-violet-600 hover:bg-violet-500 text-white font-semibold shadow-md shadow-violet-600/25">
-              Enter Cyber Arena <ChevronRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }

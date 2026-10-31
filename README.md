@@ -1,15 +1,15 @@
-# AgentShield AI
+# Agentra AI
 
 **Autonomous Multi-Agent Cybersecurity Defence System (Red Team vs Blue Team)**
 
-AgentShield AI is an intelligent cybersecurity simulation platform where autonomous AI agents engage in controlled adversarial scenarios (Red Team offensive attacks vs Blue Team defensive detection and mitigation) within safe, sandboxed, deterministic mock environments.
+Agentra AI is an intelligent cybersecurity simulation platform where autonomous AI agents engage in controlled adversarial scenarios (Red Team offensive attacks vs Blue Team defensive detection and mitigation) within safe, sandboxed, deterministic mock environments.
 
 ---
 
 ## Architecture Overview (Phases 1–5)
 
 ```
-AgentShield-AI/
+Agentra-AI/
 ├── .env.example                       # Environment variables template
 ├── .gitignore                         # Git ignore rules (protects secrets, caches, artifacts)
 ├── pyproject.toml                     # Python packaging and project configuration

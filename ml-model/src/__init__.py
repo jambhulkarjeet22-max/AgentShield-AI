@@ -1,2 +1,2 @@
-"""AgentShield-AI ML Source Package."""
+"""Agentra-AI ML Source Package."""
 

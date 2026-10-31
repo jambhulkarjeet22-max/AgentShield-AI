@@ -1,4 +1,4 @@
-"""AgentShield AI — Convex DB Connectivity and Reactive Sync Verification Script.
+"""Agentra AI — Convex DB Connectivity and Reactive Sync Verification Script.
 
 Tests:
 1. Environment configuration for Convex (CONVEX_URL / NEXT_PUBLIC_CONVEX_URL).
@@ -21,7 +21,7 @@ from backend.app.db.convex_client import ConvexSyncClient, convex_client
 
 def main():
     print("=" * 70)
-    print("AgentShield AI — Convex Database Verification")
+    print("Agentra AI — Convex Database Verification")
     print("=" * 70)
 
     url = settings.CONVEX_URL or os.environ.get("CONVEX_URL") or os.environ.get("NEXT_PUBLIC_CONVEX_URL")

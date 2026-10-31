@@ -114,7 +114,7 @@ def detect_unknown_recipient(
         if recipient and recipient not in instruction.lower():
             # Check domain
             domain = recipient.split("@")[-1] if "@" in recipient else ""
-            if domain and domain != "agentshield.test":
+            if domain and domain != "agentra.test":
                 sig_id = "UNKNOWN_RECIPIENT"
                 return RiskSignal(
                     signal_id=sig_id,

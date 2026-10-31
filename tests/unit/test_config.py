@@ -6,7 +6,7 @@ from backend.app.core.config import Settings, get_settings
 def test_default_settings():
     """Verify default settings load cleanly with safe defaults."""
     settings = get_settings()
-    assert settings.APP_NAME == "AgentShield-AI"
+    assert settings.APP_NAME == "Agentra-AI"
     assert settings.API_V1_PREFIX == "/api/v1"
     assert settings.PORT == 8000
     assert settings.HOST == "127.0.0.1"

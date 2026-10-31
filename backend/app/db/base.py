@@ -1,4 +1,4 @@
-"""Declarative Base for SQLAlchemy 2.0 ORM models in AgentShield AI."""
+"""Declarative Base for SQLAlchemy 2.0 ORM models in Agentra AI."""
 
 from datetime import datetime, timezone
 from sqlalchemy import DateTime

@@ -1,4 +1,4 @@
-"""Standalone FastAPI prediction microservice for AgentShield-AI Prompt Injection Detection.
+"""Standalone FastAPI prediction microservice for Agentra-AI Prompt Injection Detection.
 
 Completely decoupled from backend/app/main.py. Can be run independently via:
     uvicorn ml-model.api.app:app --port 8001
@@ -55,7 +55,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AgentShield-AI Prompt Injection Classifier",
+    title="Agentra-AI Prompt Injection Classifier",
     description="Standalone ML classification microservice for detecting prompt injection and adversarial directives.",
     version="0.1.0",
     lifespan=lifespan,

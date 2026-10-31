@@ -32,7 +32,7 @@ def test_get_email_by_id_success():
     safe_msg = mock_email_service.get_message(actor=actor, message_id="msg-safe-001")
     assert safe_msg.id == "msg-safe-001"
     assert safe_msg.is_flagged_malicious is False
-    assert "AgentShield" in safe_msg.subject
+    assert "Agentra" in safe_msg.subject
 
     # Malicious injection sample
     mal_msg = mock_email_service.get_message(actor=actor, message_id="msg-mal-002")
@@ -53,15 +53,15 @@ def test_send_email_success():
     """Verify sending a simulated email (stored in memory, not sent over network)."""
     actor = MOCK_ACTORS["employee"]
     req = SendEmailRequest(
-        recipient="security-lead@agentshield.test",
+        recipient="security-lead@agentra.test",
         subject="Phishing Report Detected",
         body="I received a suspicious wire transfer request.",
     )
     sent_msg = mock_email_service.send_message(actor=actor, request=req)
-    assert sent_msg.recipient == "security-lead@agentshield.test"
+    assert sent_msg.recipient == "security-lead@agentra.test"
     assert sent_msg.subject == "Phishing Report Detected"
     assert sent_msg.folder == "sent"
-    assert sent_msg.sender == f"{actor.actor_id}@agentshield.test"
+    assert sent_msg.sender == f"{actor.actor_id}@agentra.test"
 
 
 def test_send_email_unauthorized():

@@ -20,7 +20,7 @@ from backend.app.agents.redteam.config import (
 from backend.app.agents.redteam.schemas import AttackCategory, AttackOutcome, AttackResult
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.agents.redteam.evaluator")
+logger = get_logger("agentra.agents.redteam.evaluator")
 
 
 class AttackEvaluator:

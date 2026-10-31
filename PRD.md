@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD)
 
-## Project: AgentShield AI
+## Project: Agentra AI
 **Autonomous Multi-Agent Cybersecurity Defense & Simulation System (Red Team vs. Blue Team)**
 
 | Attribute | Specification |
@@ -27,7 +27,7 @@ Traditional application firewalls (WAFs) and perimeter defenses are blind to:
 4. **Tool Abuse & Denial of Service**: Invocations of prohibited system tools, hallucinated database drops, or runaway execution loops.
 
 ### 1.2 Product Vision
-**AgentShield AI** is an intelligent, air-gapped cybersecurity simulation platform where autonomous AI agents engage in controlled adversarial combat. The platform operates a deterministic multi-agent Triad:
+**Agentra AI** is an intelligent, air-gapped cybersecurity simulation platform where autonomous AI agents engage in controlled adversarial combat. The platform operates a deterministic multi-agent Triad:
 - **Red Team Attacker Agent**: Automatically designs and dispatches 15 distinct, structured cyber attacks across 6 attack vectors.
 - **Target AI Orchestrator Agent**: Executes multi-step business tasks while enforcing strict policy boundaries and treating untrusted content as passive, inert data.
 - **Blue Team Guardian Agent**: Operates as a proactive, sub-second security gateway that combines rule-based policy validation with calibrated ML threat advisories to score, allow, require approval for, or block actions in real time.
@@ -38,7 +38,7 @@ All simulations run inside safe, deterministic mock environments with **zero pro
 
 ## 2. Target Audience & User Personas
 
-| Persona | Role | Primary Goals in AgentShield |
+| Persona | Role | Primary Goals in Agentra |
 | :--- | :--- | :--- |
 | **SecOps / SOC Analyst** | Blue Team Operator | Monitor live threat evaluations, inspect Guardian risk scores and signals, and approve or reject high-risk dual-authorization requests. |
 | **AI Red Teamer / Researcher** | Adversarial Tester | Launch automated attack campaigns, inspect payload effectiveness, verify prompt injection boundaries, and identify policy loopholes. |

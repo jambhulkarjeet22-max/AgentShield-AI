@@ -36,7 +36,7 @@ from backend.app.agents.redteam.config import MAX_ATTACKS_PER_CAMPAIGN
 from backend.app.agents.redteam.schemas import AttackCategory, AttackDescriptor
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.agents.redteam.planner")
+logger = get_logger("agentra.agents.redteam.planner")
 
 # Master ordered registry of all available attacks, grouped by category.
 # Order within each category is deterministic (execution order for campaigns).

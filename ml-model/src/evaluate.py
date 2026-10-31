@@ -1,4 +1,4 @@
-"""Evaluation script for AgentShield-AI Prompt Injection Detection model.
+"""Evaluation script for Agentra-AI Prompt Injection Detection model.
 
 Evaluates the trained model on the exact reproducible held-out test split (ml-model/data/test.csv).
 Computes:
@@ -132,7 +132,7 @@ def print_evaluation_report(metrics: Dict[str, Any]) -> None:
     cal_m = metrics["calibration_evaluation"]
 
     print("=================================================================")
-    print("AgentShield-AI ML Model Evaluation Report")
+    print("Agentra-AI ML Model Evaluation Report")
     print("=================================================================")
     print(f"Test Split Size:         {ds['test_sample_count']} samples")
     print(f"  - Actual SAFE:         {ds['safe_count']}")

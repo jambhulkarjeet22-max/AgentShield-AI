@@ -41,7 +41,7 @@ def test_read_public_file_success():
     guest = MOCK_ACTORS["guest"]
     content_res = mock_filesystem_service.read_file(guest, "public/company_handbook.txt")
     assert content_res.path == "public/company_handbook.txt"
-    assert "AGENTSHIELD CORP EMPLOYEE HANDBOOK" in content_res.content
+    assert "AGENTRA CORP EMPLOYEE HANDBOOK" in content_res.content
 
 
 def test_read_confidential_file_unauthorized():

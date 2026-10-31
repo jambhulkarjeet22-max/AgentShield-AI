@@ -19,7 +19,7 @@ from backend.app.core.logging import get_logger
 from backend.app.security.actors import MockActor
 from backend.app.security.audit import audit_service
 
-logger = get_logger("agentshield.agents.target.orchestrator")
+logger = get_logger("agentra.agents.target.orchestrator")
 
 
 class TargetAgentOrchestrator:

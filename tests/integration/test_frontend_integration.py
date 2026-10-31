@@ -28,7 +28,7 @@ class TestFrontendBuildArtifacts:
 
         content = index_html.read_text(encoding="utf-8")
         assert '<div id="root"></div>' in content
-        assert "AgentShield AI" in content
+        assert "Agentra AI" in content
 
         assets_dir = DIST_DIR / "assets"
         assert assets_dir.exists() and any(assets_dir.glob("*.js")), "Missing compiled JavaScript in frontend/dist/assets"

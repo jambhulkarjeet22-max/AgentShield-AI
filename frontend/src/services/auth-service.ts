@@ -89,9 +89,9 @@ export function getCurrentSession(): UserSession {
   const actor = getActorFromKey(key);
 
   const emailMap: Record<Role, string> = {
-    ADMIN: 'admin@agentshield.internal',
-    SECURITY_ANALYST: 'analyst@agentshield.internal',
-    EMPLOYEE: 'employee@agentshield.internal',
+    ADMIN: 'admin@agentra.internal',
+    SECURITY_ANALYST: 'analyst@agentra.internal',
+    EMPLOYEE: 'employee@agentra.internal',
     GUEST: 'guest@external.partner',
     UNTRUSTED_AGENT: 'untrusted@simulator.adversary',
     ANONYMOUS: 'anonymous@visitor.local',
@@ -101,7 +101,7 @@ export function getCurrentSession(): UserSession {
     actor_id: actor.actor_id,
     role: actor.role,
     name: actor.role.replace('_', ' '),
-    email: emailMap[actor.role] || 'user@agentshield.internal',
+    email: emailMap[actor.role] || 'user@agentra.internal',
     api_key: actor.api_key,
   };
 }

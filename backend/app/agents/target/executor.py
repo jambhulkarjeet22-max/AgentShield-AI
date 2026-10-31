@@ -14,7 +14,7 @@ from backend.app.tools.filesystem.service import mock_filesystem_service
 from backend.app.tools.payments.models import CreatePaymentPayload
 from backend.app.tools.payments.service import mock_payment_service
 
-logger = get_logger("agentshield.agents.target.executor")
+logger = get_logger("agentra.agents.target.executor")
 
 
 class ToolExecutor:

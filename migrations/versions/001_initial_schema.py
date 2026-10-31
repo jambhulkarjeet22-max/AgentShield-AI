@@ -1,4 +1,4 @@
-"""Initial normalized schema for AgentShield AI.
+"""Initial normalized schema for Agentra AI.
 
 Revision ID: 001_initial_schema
 Revises:

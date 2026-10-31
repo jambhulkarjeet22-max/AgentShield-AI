@@ -1,2 +1,2 @@
-"""AgentShield AI Backend Package."""
+"""Agentra AI Backend Package."""
 

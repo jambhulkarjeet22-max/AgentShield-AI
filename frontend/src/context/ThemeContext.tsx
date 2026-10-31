@@ -16,7 +16,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
 
   useEffect(() => {
-    const saved = localStorage.getItem('agentshield_theme') as Theme | null;
+    const saved = localStorage.getItem('agentra_theme') as Theme | null;
     if (saved === 'light' || saved === 'dark') {
       setThemeState(saved);
       document.documentElement.classList.toggle('light', saved === 'light');
@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    localStorage.setItem('agentshield_theme', t);
+    localStorage.setItem('agentra_theme', t);
     document.documentElement.classList.toggle('light', t === 'light');
   };
 

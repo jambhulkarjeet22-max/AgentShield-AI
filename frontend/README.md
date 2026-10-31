@@ -1,6 +1,6 @@
-# AgentShield AI — Frontend Application
+# Agentra AI — Frontend Application
 
-Production-quality Next.js App Router frontend for **AgentShield — An Adaptive AI Security Testing Platform featuring a Futuristic 3D Cyber Battlefield**.
+Production-quality Next.js App Router frontend for **Agentra — An Adaptive AI Security Testing Platform featuring a Futuristic 3D Cyber Battlefield**.
 
 ---
 

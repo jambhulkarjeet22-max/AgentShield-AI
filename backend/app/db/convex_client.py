@@ -1,4 +1,4 @@
-"""Convex Cloud Database Client for AgentShield AI.
+"""Convex Cloud Database Client for Agentra AI.
 
 Provides real-time event and campaign synchronisation to Convex DB
 without requiring local PostgreSQL installation or socket management.
@@ -16,7 +16,7 @@ import httpx
 from backend.app.core.config import settings
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.db.convex")
+logger = get_logger("agentra.db.convex")
 
 
 class ConvexSyncClient:
@@ -113,7 +113,7 @@ class ConvexSyncClient:
         except Exception as exc:
             logger.debug("Convex async dispatch failed: %s", exc)
 
-    # Convenience non-blocking sync methods for AgentShield entities
+    # Convenience non-blocking sync methods for Agentra entities
     def sync_campaign(self, campaign_data: Dict[str, Any]) -> None:
         """Sync campaign record to Convex campaigns table in background."""
         self._async_mutation("campaigns:save", campaign_data)

@@ -14,7 +14,7 @@ from backend.app.core.config import settings
 from backend.app.core.logging import get_logger
 from backend.app.db.convex_client import convex_client
 
-logger = get_logger("agentshield.db.session")
+logger = get_logger("agentra.db.session")
 
 _engine: Optional[Engine] = None
 _session_factory: Optional[sessionmaker[Session]] = None
@@ -55,7 +55,7 @@ def create_db_engine(db_url: Optional[str] = None) -> Engine:
             "Could not initialize PostgreSQL engine (%s). Falling back to zero-config SQLite.",
             exc,
         )
-        return create_db_engine("sqlite:///./agentshield.db")
+        return create_db_engine("sqlite:///./agentra.db")
 
 
 def get_engine() -> Engine:

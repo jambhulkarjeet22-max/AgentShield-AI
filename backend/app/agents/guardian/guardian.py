@@ -22,7 +22,7 @@ from backend.app.security.actors import MockActor
 from backend.app.security.audit import audit_service
 from backend.app.services.ml_client import MLClient
 
-logger = get_logger("agentshield.agents.guardian")
+logger = get_logger("agentra.agents.guardian")
 
 
 class BlueTeamGuardian:

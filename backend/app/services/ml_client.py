@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from backend.app.core.config import settings
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.services.ml_client")
+logger = get_logger("agentra.services.ml_client")
 
 
 class MLInferenceResult(BaseModel):

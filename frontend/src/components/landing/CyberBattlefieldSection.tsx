@@ -84,7 +84,7 @@ export function CyberBattlefieldSection() {
   });
 
   const paragraphText =
-    'AgentShield AI is an autonomous cybersecurity simulation platform where adversaries attack, defenders intercept, and AI agents execute business workflows strictly within deterministic, air-gapped mock environments.';
+    'Agentra AI is an autonomous cybersecurity simulation platform where adversaries attack, defenders intercept, and AI agents execute business workflows strictly within deterministic, air-gapped mock environments.';
 
   return (
     <section

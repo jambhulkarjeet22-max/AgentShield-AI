@@ -28,6 +28,21 @@
     --input: 265 24% 17%;              /* #281938 */
     --ring: 265 89% 66%;               /* #a855f7 - Cyber Violet Ring */
     --radius: 0.5rem;
+
+    /* Base UI / Modern Sidebar Primitive Tokens (Dark/Default) */
+    --primitive-radius-item: 0.625rem;
+    --primitive-radius-surface: 1rem;
+    --primitive-radius-control-sm: 0.625rem;
+    --primitive-ring: rgba(168, 85, 247, 0.45);
+    --primitive-text-secondary: rgba(248, 246, 252, 0.72);
+    --primitive-surface-hover: rgba(168, 85, 247, 0.08);
+    --primitive-surface-selected: rgba(168, 85, 247, 0.16);
+    --primitive-surface-elevated: #120b1c;
+    --primitive-shadow-raised: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+    --primitive-chart-1: #a855f7;
+    --chart-1: #a855f7;
+    --color-brand: #a855f7;
+    --color-brand-foreground: #ffffff;
   }
 
   .light {
@@ -52,7 +67,43 @@
     --input: 82 22% 60%;               /* #a3b18a */
     --ring: 119 22% 42%;               /* #588157 Focus Ring */
     --radius: 0.5rem;
+
+    /* Base UI / Modern Sidebar Primitive Tokens (Light) */
+    --primitive-radius-item: 0.625rem;
+    --primitive-radius-surface: 1rem;
+    --primitive-radius-control-sm: 0.625rem;
+    --primitive-ring: rgba(88, 129, 87, 0.45);
+    --primitive-text-secondary: rgba(52, 78, 65, 0.75);
+    --primitive-surface-hover: rgba(58, 90, 64, 0.08);
+    --primitive-surface-selected: rgba(58, 90, 64, 0.16);
+    --primitive-surface-elevated: #ffffff;
+    --primitive-shadow-raised: 0 1px 2px rgba(0,0,0,0.06), 0 8px 24px -12px rgba(0,0,0,0.12);
+    --primitive-chart-1: #588157;
+    --chart-1: #588157;
+    --color-brand: #588157;
+    --color-brand-foreground: #ffffff;
   }
+}
+
+/* Sidebar scoped direct color tokens for components with var(--background) syntax */
+[data-slot="sidebar"] {
+  --background: #08050e;
+  --foreground: #f8f6fc;
+  --border: 265 24% 17%;
+  --card: #120b1c;
+  --muted-foreground: #b2a8c2;
+  --primary: #a855f7;
+  --primary-foreground: #ffffff;
+}
+
+.light [data-slot="sidebar"] {
+  --background: #dad7cd;
+  --foreground: #344e41;
+  --border: 82 22% 60%;
+  --card: #e8e6df;
+  --muted-foreground: #3a5a40;
+  --primary: #588157;
+  --primary-foreground: #f5f7fa;
 }
 
 @layer base {
@@ -139,5 +190,19 @@
 
 .light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(168, 85, 247, 0.7);
+}
+
+/* Print Stylesheet for Formal Security Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #09090b !important;
+  }
+  header, nav, aside, .no-print, [role="navigation"] {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
 }
 

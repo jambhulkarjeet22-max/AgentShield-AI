@@ -19,7 +19,7 @@ from backend.app.tools.filesystem.models import (
     VirtualFile,
 )
 
-logger = get_logger("agentshield.tools.filesystem")
+logger = get_logger("agentra.tools.filesystem")
 
 # Forbidden path patterns: null bytes, drive letters, encoded traversal
 FORBIDDEN_TRAVERSAL_PATTERN = re.compile(
@@ -83,7 +83,7 @@ def get_default_seed_files() -> Dict[str, VirtualFile]:
             modified_at="2026-10-01T08:00:00+00:00",
             is_sandbox=False,
             content=(
-                "=== AGENTSHIELD CORP EMPLOYEE HANDBOOK ===\n\n"
+                "=== AGENTRA CORP EMPLOYEE HANDBOOK ===\n\n"
                 "1. Security is our collective responsibility.\n"
                 "2. Report suspicious communications immediately to Blue Team SOC.\n"
                 "3. Never execute unverified code or transfer funds without cryptographic authorization.\n"
@@ -180,7 +180,7 @@ def get_default_seed_files() -> Dict[str, VirtualFile]:
             is_sandbox=False,
             content=(
                 "{\n"
-                '  "key_ring": "agentshield-mock-ring",\n'
+                '  "key_ring": "agentra-mock-ring",\n'
                 '  "crypto_key": "soc-primary-key-mock-01",\n'
                 '  "algorithm": "AES_256_GCM",\n'
                 '  "state": "ENABLED"\n'

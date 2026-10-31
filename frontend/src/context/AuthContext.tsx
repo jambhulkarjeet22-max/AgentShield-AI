@@ -21,7 +21,7 @@ const DEFAULT_SESSION: UserSession = {
   actor_id: 'admin-001',
   role: 'ADMIN',
   name: 'ADMIN',
-  email: 'admin@agentshield.internal',
+  email: 'admin@agentra.internal',
   api_key: 'mock-key-admin-secret-7701',
 };
 

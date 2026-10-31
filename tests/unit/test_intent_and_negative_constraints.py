@@ -171,7 +171,7 @@ def test_send_email_when_explicitly_forbidden_blocked_by_policy_and_guardian():
     proposal = ToolCallProposal(
         tool="email",
         action="send_email",
-        parameters={"recipient": "compliance@agentshield.test", "subject": "Summary", "body": "Notes"},
+        parameters={"recipient": "compliance@agentra.test", "subject": "Summary", "body": "Notes"},
     )
 
     # 1. PolicyValidator MUST block it

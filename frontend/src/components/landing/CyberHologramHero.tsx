@@ -906,7 +906,7 @@ export function CyberHologramHero() {
             <span className="logo-icon">
               <ShieldAlert className="w-4 h-4" />
             </span>
-            <span>AgentShield</span>
+            <span>Agentra</span>
           </Link>
 
           <nav className="nav-links" aria-label="Primary Navigation">

@@ -1,6 +1,6 @@
-# AgentShield-AI — ML Prompt Injection Detection Component
+# Agentra-AI — ML Prompt Injection Detection Component
 
-This directory contains the standalone Machine Learning component for **AgentShield-AI**, designed to classify natural language text as either **`SAFE`** or **`SUSPICIOUS`** (prompt injection or adversarial directive).
+This directory contains the standalone Machine Learning component for **Agentra-AI**, designed to classify natural language text as either **`SAFE`** or **`SUSPICIOUS`** (prompt injection or adversarial directive).
 
 ---
 

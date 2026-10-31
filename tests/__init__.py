@@ -1,2 +1,2 @@
-"""Test suite for AgentShield AI."""
+"""Test suite for Agentra AI."""
 

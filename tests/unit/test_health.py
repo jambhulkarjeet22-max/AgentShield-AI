@@ -24,6 +24,6 @@ def test_v1_health_endpoint(client: TestClient):
 
     data = response.json()
     assert data["status"] == "healthy"
-    assert data["app"] == "AgentShield-AI"
+    assert data["app"] == "Agentra-AI"
     assert data["version"] == "0.1.0"
 

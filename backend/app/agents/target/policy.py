@@ -10,7 +10,7 @@ from backend.app.security.actors import MockActor
 from backend.app.security.intent_rules import is_action_explicitly_denied
 from backend.app.tools.filesystem.service import sanitize_virtual_path
 
-logger = get_logger("agentshield.agents.target.policy")
+logger = get_logger("agentra.agents.target.policy")
 
 
 @dataclass(frozen=True)

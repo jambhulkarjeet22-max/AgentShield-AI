@@ -10,7 +10,7 @@ export default function RegisterPage() {
           <ShieldAlert className="w-6 h-6" />
         </div>
         <span className="font-bold text-xl tracking-tight text-foreground">
-          AgentShield
+          Agentra
         </span>
       </Link>
       <SignUp forceRedirectUrl="/dashboard" />

@@ -355,7 +355,7 @@ class TestGuardianMLIntegration:
         proposal = ToolCallProposal(
             tool="email",
             action="send_email",
-            parameters={"recipient": "vendor@agentshield.test", "subject": "Notice"},
+            parameters={"recipient": "vendor@agentra.test", "subject": "Notice"},
         )
         instruction = "Read inbox and summarize emails. Do not send any emails."
 

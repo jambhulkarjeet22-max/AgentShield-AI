@@ -30,7 +30,7 @@ from backend.app.core.logging import get_logger
 from backend.app.security.actors import MockActor
 from backend.app.security.audit import audit_service
 
-logger = get_logger("agentshield.agents.redteam.orchestrator")
+logger = get_logger("agentra.agents.redteam.orchestrator")
 
 
 class RedTeamOrchestrator:
@@ -118,6 +118,11 @@ class RedTeamOrchestrator:
             target_actor_key=target_key,
         )
 
+        try:
+            langfuse_service.start_campaign_trace(campaign)
+        except Exception:
+            pass
+
         for attack in attacks:
             logger.info(
                 "Campaign [%s]: executing attack %s (%s)",
@@ -126,6 +131,7 @@ class RedTeamOrchestrator:
                 attack.attack_name,
             )
 
+            dispatch_response = None
             try:
                 if client is not None:
                     dispatch_response = dispatcher.submit_attack(
@@ -138,7 +144,7 @@ class RedTeamOrchestrator:
                         attack_id=attack.attack_id,
                     )
                 result = AttackEvaluator.evaluate(attack, dispatch_response)
-            except DispatchError as exc:
+            except Exception as exc:
                 logger.error(
                     "Campaign [%s]: dispatch error for attack %s: %s",
                     campaign.campaign_id,
@@ -191,6 +197,18 @@ class RedTeamOrchestrator:
                 },
             )
 
+            # Deep Multi-Agent Observability Trace (RedTeam -> Target AI -> Blue Guardian -> Tool Sandbox -> Evaluator)
+            try:
+                langfuse_service.trace_attack_lifecycle(
+                    campaign=campaign,
+                    attack=attack,
+                    payload=attack.build_payload(),
+                    dispatch_response=dispatch_response or {},
+                    result=result,
+                )
+            except Exception as lf_step_err:
+                logger.debug("Langfuse attack step trace warning: %s", lf_step_err)
+
         # Finalise campaign — aggregate outcomes directly from actual attack results
         campaign.total_attacks = len(campaign.attack_results)
         campaign.defences_held = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.DEFENCE_HELD)
@@ -225,15 +243,11 @@ class RedTeamOrchestrator:
         except Exception as exc:
             logger.debug("Convex campaign sync skipped: %s", exc)
 
-        # Record campaign trace and defense scores in Langfuse
+        # Finalize Langfuse campaign trace and compute scores
         try:
-            from backend.app.services.langfuse_service import langfuse_service
-            langfuse_service.trace_campaign_summary(
-                campaign=campaign,
-                results=campaign.attack_results,
-            )
+            langfuse_service.finish_campaign_trace(campaign)
         except Exception as lf_exc:
-            logger.debug("Langfuse campaign trace skipped: %s", lf_exc)
+            logger.debug("Langfuse finish campaign trace notice: %s", lf_exc)
 
         audit_service.record(
             actor_id=actor.actor_id,
@@ -327,6 +341,11 @@ class RedTeamOrchestrator:
             target_actor_key=target_key,
         )
 
+        try:
+            langfuse_service.start_campaign_trace(campaign)
+        except Exception:
+            pass
+
         for attack in attacks:
             try:
                 dispatch_response = dispatcher.submit_attack(
@@ -373,6 +392,17 @@ class RedTeamOrchestrator:
                 },
             )
 
+            try:
+                langfuse_service.trace_attack_lifecycle(
+                    campaign=campaign,
+                    attack=attack,
+                    payload=attack.build_payload(),
+                    dispatch_response=dispatch_response or {},
+                    result=result,
+                )
+            except Exception as lf_step_err:
+                logger.debug("Langfuse attack step trace warning: %s", lf_step_err)
+
         campaign.total_attacks = len(campaign.attack_results)
         campaign.defences_held = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.DEFENCE_HELD)
         campaign.failed_to_trigger = sum(1 for r in campaign.attack_results if r.outcome == AttackOutcome.FAILED_TO_TRIGGER)
@@ -406,15 +436,11 @@ class RedTeamOrchestrator:
         except Exception as exc:
             logger.debug("Convex campaign sync skipped: %s", exc)
 
-        # Record campaign trace and defense scores in Langfuse
+        # Finalize Langfuse campaign trace and compute scores
         try:
-            from backend.app.services.langfuse_service import langfuse_service
-            langfuse_service.trace_campaign_summary(
-                campaign=campaign,
-                results=campaign.attack_results,
-            )
+            langfuse_service.finish_campaign_trace(campaign)
         except Exception as lf_exc:
-            logger.debug("Langfuse campaign trace skipped: %s", lf_exc)
+            logger.debug("Langfuse finish campaign trace notice: %s", lf_exc)
 
         audit_service.record(
             actor_id=actor.actor_id,

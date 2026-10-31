@@ -73,14 +73,14 @@ async def send_test_trace() -> Dict[str, Any]:
         now_str = datetime.now(timezone.utc).isoformat()
         with propagate_attributes(
             user_id="admin-001",
-            tags=["manual-test", "heartbeat", "agentshield"],
-            trace_name="agentshield:heartbeat:ping",
+            tags=["manual-test", "heartbeat", "agentra"],
+            trace_name="agentra:heartbeat:ping",
             metadata={"source": "api_test_endpoint", "timestamp": now_str},
         ):
             client.score_current_trace(
                 name="heartbeat_status",
                 value=1.0,
-                comment=f"Manual heartbeat verification ping from AgentShield at {now_str}",
+                comment=f"Manual heartbeat verification ping from Agentra at {now_str}",
             )
         langfuse_service.flush()
         return {"status": "success", "message": "Heartbeat trace sent to Langfuse Cloud.", "timestamp": now_str}

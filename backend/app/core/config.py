@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """AgentShield AI application configuration."""
+    """Agentra AI application configuration."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     )
 
     # Core Application Settings
-    APP_NAME: str = Field(default="AgentShield-AI", description="Application name")
+    APP_NAME: str = Field(default="Agentra-AI", description="Application name")
     APP_VERSION: str = Field(default="0.1.0", description="Application version")
     APP_ENV: str = Field(default="development", description="Environment: development, test, production")
     DEBUG: bool = Field(default=False, description="Debug mode flag")
@@ -36,14 +36,14 @@ class Settings(BaseSettings):
     # Database & Storage (Convex Cloud Database & SQLite/PostgreSQL)
     CONVEX_URL: Optional[str] = Field(default=None, description="Convex Cloud deployment URL")
     DATABASE_URL: str = Field(
-        default="sqlite:///./agentshield.db",
+        default="sqlite:///./agentra.db",
         description="Database connection URL (defaults to zero-config SQLite)",
     )
-    POSTGRES_USER: Optional[str] = Field(default="agentshield", description="Optional PostgreSQL username")
+    POSTGRES_USER: Optional[str] = Field(default="agentra", description="Optional PostgreSQL username")
     POSTGRES_PASSWORD: Optional[str] = Field(default=None, description="Optional PostgreSQL password")
     POSTGRES_HOST: Optional[str] = Field(default="localhost", description="Optional PostgreSQL host")
     POSTGRES_PORT: Optional[int] = Field(default=5432, description="Optional PostgreSQL port")
-    POSTGRES_DB: Optional[str] = Field(default="agentshield_db", description="Optional PostgreSQL db name")
+    POSTGRES_DB: Optional[str] = Field(default="agentra_db", description="Optional PostgreSQL db name")
     DATABASE_POOL_SIZE: int = Field(default=10, description="SQLAlchemy connection pool size")
     DATABASE_MAX_OVERFLOW: int = Field(default=20, description="SQLAlchemy connection pool max overflow")
     DATABASE_ECHO: bool = Field(default=False, description="Log generated SQL statements")

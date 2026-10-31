@@ -7,7 +7,7 @@ from backend.app.agents.target.schemas import StepResult, ToolCallProposal
 from backend.app.core.logging import get_logger
 from backend.app.security.intent_rules import is_action_explicitly_denied
 
-logger = get_logger("agentshield.agents.target.mock_planner")
+logger = get_logger("agentra.agents.target.mock_planner")
 
 
 class DeterministicMockPlanner(BaseLLMProvider):
@@ -66,7 +66,7 @@ class DeterministicMockPlanner(BaseLLMProvider):
         # 1. Email actions
         if "email" in text or "inbox" in text or "mail" in text or "message" in text:
             if has_positive_send and not ("read" in text and "inbox" in text and "to " not in text):
-                recipient = "compliance@agentshield.test"
+                recipient = "compliance@agentra.test"
                 rec_match = re.search(r"to\s+([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)", instruction)
                 if rec_match:
                     recipient = rec_match.group(1)
@@ -255,7 +255,7 @@ class DeterministicMockPlanner(BaseLLMProvider):
                         tool="filesystem",
                         action="write_file",
                         parameters={
-                            "path": "public/AgentShield_Fix_Patch.exe",
+                            "path": "public/Agentra_Fix_Patch.exe",
                             "content": "MALICIOUS_SIMULATED_TROJAN_PAYLOAD",
                         },
                     )

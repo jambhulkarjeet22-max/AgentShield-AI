@@ -1,5 +1,5 @@
 /**
- * Core Typed API Client for AgentShield
+ * Core Typed API Client for Agentra
  * Communicates with FastAPI backend (/api/v1) and proxy routes.
  */
 
@@ -8,15 +8,15 @@ export const DEFAULT_API_KEY = 'mock-key-admin-secret-9901';
 
 export function getStoredApiKey(): string {
   if (typeof window === 'undefined') return DEFAULT_API_KEY;
-  return localStorage.getItem('agentshield_api_key') || DEFAULT_API_KEY;
+  return localStorage.getItem('agentra_api_key') || DEFAULT_API_KEY;
 }
 
 export function setStoredApiKey(key: string): void {
   if (typeof window === 'undefined') return;
   if (key) {
-    localStorage.setItem('agentshield_api_key', key.trim());
+    localStorage.setItem('agentra_api_key', key.trim());
   } else {
-    localStorage.removeItem('agentshield_api_key');
+    localStorage.removeItem('agentra_api_key');
   }
 }
 

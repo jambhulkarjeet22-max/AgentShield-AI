@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'AgentShield AI — Autonomous Multi-Agent Cybersecurity Defense Platform',
+  title: 'Agentra AI — Autonomous Multi-Agent Cybersecurity Defense Platform',
   description:
     'An Adaptive AI Security Testing Platform featuring an interactive 3D Cyber Battlefield.',
 };

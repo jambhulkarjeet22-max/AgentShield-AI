@@ -1,4 +1,4 @@
-"""Core configuration, logging, and error handling for AgentShield AI."""
+"""Core configuration, logging, and error handling for Agentra AI."""
 
 from backend.app.core.config import get_settings, settings
 from backend.app.core.exceptions import AppException

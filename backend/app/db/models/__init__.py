@@ -1,4 +1,4 @@
-"""Export all SQLAlchemy 2.0 ORM models for AgentShield AI."""
+"""Export all SQLAlchemy 2.0 ORM models for Agentra AI."""
 
 from backend.app.db.models.task import TaskModel, TaskStepModel
 from backend.app.db.models.campaign import CampaignModel, CampaignAttackResultModel

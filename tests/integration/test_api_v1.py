@@ -8,7 +8,7 @@ def test_root_endpoint(client: TestClient):
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "AgentShield-AI"
+    assert data["name"] == "Agentra-AI"
     assert data["status"] == "operational"
     assert data["api_v1"] == "/api/v1"
 

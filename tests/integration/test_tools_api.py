@@ -16,7 +16,7 @@ def test_email_api_flow(client: TestClient, employee_headers: dict, guest_header
     # 2. Read specific email
     res_msg = client.get("/api/v1/tools/email/messages/msg-safe-001", headers=employee_headers)
     assert res_msg.status_code == 200
-    assert res_msg.json()["subject"] == "Welcome to AgentShield Corp Security Network"
+    assert res_msg.json()["subject"] == "Welcome to Agentra Corp Security Network"
 
     # 3. Read non-existent email -> 404
     res_404 = client.get("/api/v1/tools/email/messages/invalid-id-000", headers=employee_headers)
@@ -29,7 +29,7 @@ def test_email_api_flow(client: TestClient, employee_headers: dict, guest_header
 
     # 5. Send simulated email
     send_payload = {
-        "recipient": "lead-analyst@agentshield.test",
+        "recipient": "lead-analyst@agentra.test",
         "subject": "Suspicious Activity Report",
         "body": "Spotted anomalous payment requests in the queue.",
     }
@@ -54,7 +54,7 @@ def test_filesystem_api_flow(client: TestClient, employee_headers: dict, analyst
         headers=employee_headers,
     )
     assert res_pub.status_code == 200
-    assert "AGENTSHIELD CORP EMPLOYEE HANDBOOK" in res_pub.json()["content"]
+    assert "AGENTRA CORP EMPLOYEE HANDBOOK" in res_pub.json()["content"]
 
     # 3. Read confidential file with employee -> 403 Forbidden
     res_conf_denied = client.get(

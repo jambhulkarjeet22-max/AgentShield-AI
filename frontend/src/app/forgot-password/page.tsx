@@ -23,14 +23,14 @@ export default function ForgotPasswordPage() {
               <ShieldAlert className="w-6 h-6" />
             </div>
             <span className="font-bold text-xl tracking-tight text-foreground">
-              AgentShield <span className="text-blue-400 font-mono text-xs">AI</span>
+              Agentra <span className="text-blue-400 font-mono text-xs">AI</span>
             </span>
           </Link>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             MOCK CREDENTIAL RECOVERY
           </h2>
           <p className="text-xs text-muted-foreground mt-1.5">
-            AgentShield operates in deterministic mock mode. Use the predefined actor secrets below to authenticate.
+            Agentra operates in deterministic mock mode. Use the predefined actor secrets below to authenticate.
           </p>
         </div>
 

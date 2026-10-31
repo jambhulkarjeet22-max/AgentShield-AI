@@ -308,15 +308,15 @@ export function SiteFooter() {
 
         {/* BRAND ROW */}
         <div className="site-footer__brand-row">
-          <Link href="/" className="site-footer__brand" aria-label="AgentShield AI home">
+          <Link href="/" className="site-footer__brand" aria-label="Agentra AI home">
             <span className="site-footer__mark" aria-hidden="true" />
-            <span className="site-footer__wordmark">AgentShield</span>
+            <span className="site-footer__wordmark">Agentra</span>
           </Link>
         </div>
 
         {/* LEGAL LINE */}
         <div className="site-footer__legal">
-          <p>&copy; {new Date().getFullYear()} AgentShield AI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Agentra AI. All rights reserved.</p>
           <a href="#privacy">Privacy Policy</a>
           <a href="#terms">Terms of Service</a>
         </div>

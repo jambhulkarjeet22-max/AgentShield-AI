@@ -24,7 +24,7 @@ class HealthResponse(BaseModel):
     response_model=HealthResponse,
     status_code=status.HTTP_200_OK,
     summary="System Health Check",
-    description="Returns the operational health, version, and environment of AgentShield AI.",
+    description="Returns the operational health, version, and environment of Agentra AI.",
     tags=["System"],
 )
 async def get_health() -> HealthResponse:

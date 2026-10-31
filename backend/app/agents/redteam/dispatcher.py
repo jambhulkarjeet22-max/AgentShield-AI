@@ -18,7 +18,7 @@ from backend.app.agents.redteam.config import (
 )
 from backend.app.core.logging import get_logger
 
-logger = get_logger("agentshield.agents.redteam.dispatcher")
+logger = get_logger("agentra.agents.redteam.dispatcher")
 
 
 class DispatchError(Exception):

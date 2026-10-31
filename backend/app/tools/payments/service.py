@@ -16,7 +16,7 @@ from backend.app.tools.payments.models import (
     PaymentStatus,
 )
 
-logger = get_logger("agentshield.tools.payments")
+logger = get_logger("agentra.tools.payments")
 
 # Valid secret authorization code required for simulated execution
 VALID_PAYMENT_AUTH_CODE = "MOCK-AUTH-APPROVED-2026"
