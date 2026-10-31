@@ -21,10 +21,10 @@ export function ArenaMetrics({ campaign, totalCampaigns = 0 }: ArenaMetricsProps
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
       {/* 1. Attacks Tested */}
-      <div className="flex items-center justify-between p-4 rounded-xl border border-blue-500/25 bg-blue-950/15 backdrop-blur-md transition-all duration-200 hover:border-blue-500/40">
+      <div className="flex items-center justify-between p-4 rounded-xl border border-violet-500/30 bg-violet-950/20 backdrop-blur-md transition-all duration-200 hover:border-violet-500/50">
         <div className="flex items-center gap-3.5">
-          <div className="h-11 w-11 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 flex items-center justify-center shadow-[0_0_12px_rgba(59,130,246,0.2)]">
-            <Swords className="w-5 h-5 text-blue-400" />
+          <div className="h-11 w-11 rounded-xl bg-violet-500/20 border border-violet-500/40 text-violet-400 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.25)]">
+            <Swords className="w-5 h-5 text-violet-400" />
           </div>
           <div>
             <div className="text-xs font-medium text-slate-400">Attacks Tested</div>
@@ -34,7 +34,7 @@ export function ArenaMetrics({ campaign, totalCampaigns = 0 }: ArenaMetricsProps
             </div>
           </div>
         </div>
-        <div className="text-blue-500/30 pr-1">
+        <div className="text-violet-500/35 pr-1">
           <BarChart3 className="w-6 h-6" />
         </div>
       </div>

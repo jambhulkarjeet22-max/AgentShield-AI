@@ -25,6 +25,8 @@ import { listCampaigns, getCampaign } from '@/services/test-run-service';
 import { CampaignResponse, AttackResult } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { JSONViewer } from '@/components/ui/JSONViewer';
+import { useQuery } from 'convex/react';
+import { api as convexApi } from '@convex/_generated/api';
 
 export default function TestRunsPage() {
   const router = useRouter();
@@ -34,6 +36,21 @@ export default function TestRunsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+
+  // Convex Real-Time Reactive Query for Test Runs
+  const liveCampaigns = useQuery(convexApi.campaigns.list, { limit: 50 });
+  const isConvexLive = liveCampaigns !== undefined;
+
+  const displayCampaigns: CampaignResponse[] =
+    liveCampaigns && liveCampaigns.length > 0
+      ? (liveCampaigns as unknown as CampaignResponse[])
+      : campaigns;
+
+  useEffect(() => {
+    if (displayCampaigns.length > 0 && !selectedRun) {
+      setSelectedRun(displayCampaigns[0]);
+    }
+  }, [displayCampaigns, selectedRun]);
 
   const loadRuns = async () => {
     setLoading(true);
@@ -59,7 +76,9 @@ export default function TestRunsPage() {
     loadRuns();
   }, []);
 
-  const filteredRuns = campaigns.filter((c) => {
+  const isPageLoading = isConvexLive ? false : loading;
+
+  const filteredRuns = displayCampaigns.filter((c) => {
     const matchesSearch =
       c.campaign_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.campaign_id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -76,7 +95,7 @@ export default function TestRunsPage() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
             TEST RUNS
             <Badge variant="outline" size="sm">
-              {campaigns.length} Executed Runs
+              {displayCampaigns.length} Executed Runs
             </Badge>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
@@ -96,7 +115,7 @@ export default function TestRunsPage() {
           </Button>
           <Link
             href="/arena"
-            className="inline-flex items-center justify-center font-medium transition-all h-8 px-3 text-xs rounded-md bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-500/20 active:scale-[0.98]"
+            className="inline-flex items-center justify-center font-medium transition-all h-8 px-3 text-xs rounded-md bg-violet-600 hover:bg-violet-500 text-white shadow-sm shadow-violet-600/25 active:scale-[0.98]"
           >
             <PlayCircle className="w-3.5 h-3.5 mr-1.5" />
             <span>New Test Run</span>
@@ -197,7 +216,7 @@ export default function TestRunsPage() {
                                 e.stopPropagation();
                                 setSelectedRun(r);
                               }}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-semibold"
+                              className="text-xs text-violet-400 hover:text-violet-300 font-semibold"
                             >
                               View
                             </button>
@@ -218,9 +237,9 @@ export default function TestRunsPage() {
 
             {/* Table Footer with Summary Stats */}
             <div className="px-4 py-2.5 bg-muted/20 text-[11px] text-muted-foreground flex items-center justify-between font-mono">
-              <span>Showing {filteredRuns.length} of {campaigns.length} test runs</span>
+              <span>Showing {filteredRuns.length} of {displayCampaigns.length} test runs</span>
               <span className="text-[10px] text-muted-foreground/80 flex items-center gap-1.5 font-sans">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
                 Scrollable Runs Active
               </span>
             </div>

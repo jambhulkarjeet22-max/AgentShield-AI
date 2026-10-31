@@ -59,7 +59,7 @@ export function ArenaLiveEvents({
             </div>
           </div>
         ) : (
-          <div className="relative pl-6 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-rose-500 before:via-sky-500 before:to-emerald-500">
+          <div className="relative pl-6 space-y-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-rose-500 before:via-violet-500 before:to-emerald-500">
             {events.slice(0, 10).map((evt, idx) => {
               const isSelected = selectedEventId === evt.id;
               const isBlocked = evt.status === 'BLOCKED';
@@ -100,7 +100,7 @@ export function ArenaLiveEvents({
 
                   {/* Stage 2: Blue Team & Verdict */}
                   <div className="mt-2 pt-1.5 border-t border-border/40 flex items-center justify-between text-[11px]">
-                    <span className="flex items-center gap-1 text-sky-400 font-medium">
+                    <span className="flex items-center gap-1 text-violet-400 font-medium">
                       <Bot className="w-3 h-3" /> Target AI
                     </span>
                     <span

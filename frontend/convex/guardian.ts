@@ -30,6 +30,31 @@ export const recordDecision = mutation({
   },
 });
 
+export const recordDecisionBatch = mutation({
+  args: {
+    decisions: v.array(
+      v.object({
+        decision_id: v.string(),
+        task_id: v.string(),
+        step_number: v.number(),
+        verdict: v.string(),
+        risk_score: v.number(),
+        explanation: v.string(),
+        signals: v.array(v.any()),
+        timestamp: v.string(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const ids = [];
+    for (const d of args.decisions) {
+      const id = await ctx.db.insert("guardian_decisions", d);
+      ids.push(id);
+    }
+    return { count: ids.length, ids };
+  },
+});
+
 export const listApprovals = query({
   args: {
     status: v.optional(v.string()),

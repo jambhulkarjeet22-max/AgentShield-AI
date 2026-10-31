@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(default=False, description="Debug mode flag")
     API_V1_PREFIX: str = Field(default="/api/v1", description="Prefix for API v1 routes")
 
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug(cls, v):
+        if isinstance(v, str):
+            return v.strip().lower() in ("true", "1", "yes", "on", "t", "debug")
+        return bool(v)
+
     # Network & Server
     HOST: str = Field(default="127.0.0.1", description="Server host binding")
     PORT: int = Field(default=8000, description="Server port")

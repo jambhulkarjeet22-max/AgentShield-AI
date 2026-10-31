@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useQuery } from 'convex/react';
+import { api as convexApi } from '@convex/_generated/api';
 import {
   FileCode2,
   Search,
@@ -33,6 +35,31 @@ export default function ScenariosPage() {
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
   const [selectedScenario, setSelectedScenario] = useState<AttackCatalogEntry | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Convex Real-Time Reactive Query for Attack Catalog
+  const convexCatalog = useQuery(convexApi.catalog.list);
+
+  // Sync convex catalog reactively
+  useEffect(() => {
+    if (convexCatalog && convexCatalog.length > 0) {
+      const normalized: AttackCatalogEntry[] = convexCatalog.map((c: any) => ({
+        attack_id: c.attack_id,
+        name: c.name,
+        category: c.category,
+        category_name: c.category.replace(/_/g, ' ').toUpperCase(),
+        description: c.description,
+        default_payload: '',
+        target_tool: c.target_tool,
+        severity: c.severity,
+        expected_control: c.expected_outcome,
+      }));
+      setCatalog(normalized);
+      if (!selectedScenario && normalized.length > 0) {
+        setSelectedScenario(normalized[0]);
+      }
+      setLoading(false);
+    }
+  }, [convexCatalog]);
 
   const loadCatalog = async () => {
     setLoading(true);
@@ -191,7 +218,7 @@ export default function ScenariosPage() {
                           key={sc.attack_id}
                           onClick={() => setSelectedScenario(sc)}
                           className={`cursor-pointer transition-colors ${
-                            isSelected ? 'bg-blue-600/15' : 'hover:bg-muted/20'
+                            isSelected ? 'bg-violet-600/20 text-violet-300' : 'hover:bg-muted/20'
                           }`}
                         >
                           <td className="px-4 py-3">
@@ -216,7 +243,7 @@ export default function ScenariosPage() {
                               {sc.severity}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3 text-cyan-400 capitalize">
+                          <td className="px-4 py-3 text-violet-400 capitalize">
                             {sc.target_tool}
                           </td>
                           <td className="px-4 py-3 font-sans">
@@ -231,7 +258,7 @@ export default function ScenariosPage() {
                                 e.stopPropagation();
                                 setSelectedScenario(sc);
                               }}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-semibold"
+                              className="text-xs text-violet-400 hover:text-violet-300 font-semibold"
                             >
                               Open
                             </button>
@@ -254,7 +281,7 @@ export default function ScenariosPage() {
             <div className="px-4 py-2.5 bg-muted/20 text-[11px] text-muted-foreground flex items-center justify-between font-mono">
               <span>Showing {filtered.length} of {catalog.length} attack scenarios</span>
               <span className="text-[10px] text-muted-foreground/80 flex items-center gap-1.5 font-sans">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
                 Scrollable Catalog Active
               </span>
             </div>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { useQuery } from 'convex/react';
+import { useQuery, useMutation } from 'convex/react';
 import { api as convexApi } from '@convex/_generated/api';
 import {
   Play,
@@ -78,6 +78,7 @@ export default function ArenaPage() {
     'IDLE' | 'ATTACKING' | 'DEFENDING' | 'BLOCKED' | 'BREACHED'
   >('IDLE');
   const [currentTargetTool, setCurrentTargetTool] = useState<string>('TARGET AI');
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
   const [isPaused, setIsPaused] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<CampaignResponse | null>(null);
   const [totalCampaignsCount, setTotalCampaignsCount] = useState<number>(0);
@@ -87,8 +88,31 @@ export default function ArenaPage() {
   const [resetting, setResetting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Convex Real-Time Reactive Query for latest campaign
+  // Convex Real-Time Reactive Queries & Mutations
+  const convexCatalog = useQuery(convexApi.catalog.list);
   const convexLatestCampaign = useQuery(convexApi.campaigns.getLatest);
+  const saveCampaignMutation = useMutation(convexApi.campaigns.save);
+  const recordAuditBatchMutation = useMutation(convexApi.events.recordBatch);
+  const recordDecisionBatchMutation = useMutation(convexApi.guardian.recordDecisionBatch);
+
+  // Sync catalog from Convex if available
+  useEffect(() => {
+    if (convexCatalog && convexCatalog.length > 0 && catalog.length === 0) {
+      setCatalog(
+        convexCatalog.map((c: any) => ({
+          attack_id: c.attack_id,
+          name: c.name,
+          category: c.category,
+          category_name: c.category.replace(/_/g, ' ').toUpperCase(),
+          description: c.description,
+          default_payload: '',
+          target_tool: c.target_tool,
+          severity: c.severity,
+          expected_control: c.expected_outcome,
+        }))
+      );
+    }
+  }, [convexCatalog, catalog.length]);
 
   // Reactively sync latest campaign from Convex Cloud
   useEffect(() => {
@@ -201,6 +225,60 @@ export default function ArenaPage() {
       setCurrentCampaign(campaign);
       setTotalCampaignsCount((prev) => prev + 1);
 
+      // Persist campaign and telemetry into Convex Cloud DB
+      try {
+        const attackList = campaign.results || [];
+        await saveCampaignMutation({
+          campaign_id: campaign.campaign_id,
+          campaign_name: campaign.campaign_name,
+          description: campaign.description,
+          status: campaign.status,
+          total_attacks: campaign.total_attacks,
+          defences_held: campaign.defences_held,
+          attacks_landed: campaign.attacks_landed,
+          failed_to_trigger: 0,
+          errors: 0,
+          categories: campaign.categories || [],
+          started_at: campaign.started_at,
+          completed_at: campaign.completed_at || new Date().toISOString(),
+          summary: `Campaign completed with ${campaign.defences_held}/${campaign.total_attacks} defenses held.`,
+          attack_results: attackList,
+        });
+
+        // Record audit events into Convex audit_logs table
+        const auditEvents = attackList.map((att, idx) => ({
+          event_id: `evt-${campaign.campaign_id}-${idx}-${Date.now()}`,
+          timestamp: att.timestamp || new Date().toISOString(),
+          actor_id: att.defended ? 'blue_guardian' : 'redteam_agent',
+          role: att.defended ? 'DEFENDER' : 'ATTACKER',
+          tool: resolveToolFromCategory(att.category, att.name).toLowerCase(),
+          action: att.name || att.attack_id,
+          status: att.defended ? 'ALLOWED' : 'DENIED',
+          resource: att.attack_id,
+          details: att,
+        }));
+        if (auditEvents.length > 0) {
+          await recordAuditBatchMutation({ events: auditEvents });
+        }
+
+        // Record guardian decisions into Convex guardian_decisions table
+        const guardianDecisions = attackList.map((att, idx) => ({
+          decision_id: `dec-${campaign.campaign_id}-${idx}-${Date.now()}`,
+          task_id: att.task_id || att.attack_id,
+          step_number: idx + 1,
+          verdict: att.defended ? 'ALLOW' : 'BLOCK',
+          risk_score: att.defended ? 15 : 95,
+          explanation: att.defence_mechanism || 'PolicyValidator Hard Boundary evaluation',
+          signals: [{ type: 'POLICY', outcome: att.defended ? 'PASS' : 'FAIL' }],
+          timestamp: att.timestamp || new Date().toISOString(),
+        }));
+        if (guardianDecisions.length > 0) {
+          await recordDecisionBatchMutation({ decisions: guardianDecisions });
+        }
+      } catch (convexSyncErr) {
+        console.warn('Convex persistence warning (non-blocking):', convexSyncErr);
+      }
+
       // Playback simulation events with realistic animated cadence
       const attackResults = campaign.results || [];
       const newEvents: LiveEventItem[] = [];
@@ -210,13 +288,13 @@ export default function ArenaPage() {
         const targetTool = resolveToolFromCategory(attack.category, attack.name);
         setCurrentTargetTool(targetTool);
 
-        // Step 1: Red Team moves along maze to attack tool
+        // Step 1: Red Team moves along maze to attack tool (Deliberate cinematic pace)
         setSimulationState('ATTACKING');
-        await new Promise((r) => setTimeout(r, 450));
+        await new Promise((r) => setTimeout(r, Math.round(1400 / speedMultiplier)));
 
         // Step 2: Blue Team rushes to intercept
         setSimulationState('DEFENDING');
-        await new Promise((r) => setTimeout(r, 400));
+        await new Promise((r) => setTimeout(r, Math.round(1200 / speedMultiplier)));
 
         // Step 3: Verdict reached (Shield flares or breach recorded)
         const finalStatus = attack.defended ? 'BLOCKED' : 'BREACHED';
@@ -238,7 +316,8 @@ export default function ArenaPage() {
         setLiveEvents([...newEvents]);
         setSelectedEvent(eventItem);
 
-        await new Promise((r) => setTimeout(r, 350));
+        // Step 4: Hold on verdict so user can clearly absorb the defense outcome
+        await new Promise((r) => setTimeout(r, Math.round(1400 / speedMultiplier)));
       }
 
       // Final standing state
@@ -272,10 +351,10 @@ export default function ArenaPage() {
       setCurrentTargetTool(targetTool);
 
       setSimulationState('ATTACKING');
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, Math.round(1200 / speedMultiplier)));
 
       setSimulationState('DEFENDING');
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, Math.round(1200 / speedMultiplier)));
 
       setSimulationState(item.defended ? 'BLOCKED' : 'BREACHED');
       setSelectedEvent({
@@ -290,7 +369,7 @@ export default function ArenaPage() {
         details: item,
       });
 
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, Math.round(1200 / speedMultiplier)));
     }
 
     setLoading(false);
@@ -332,7 +411,7 @@ export default function ArenaPage() {
         {/* Card Header & Controls Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-b border-border/70 bg-muted/20">
           <div className="flex items-center gap-2.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00e5ff]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-violet-400 shadow-[0_0_8px_#a855f7]" />
             <span className="text-xs font-bold font-mono tracking-wider text-foreground uppercase">
               CYBER BATTLEFIELD
             </span>
@@ -340,6 +419,29 @@ export default function ArenaPage() {
 
           {/* Action Toolbar */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* Speed Multiplier Control */}
+            <div className="flex items-center rounded-lg border border-border/80 bg-muted/40 p-0.5 text-xs font-mono">
+              <span className="px-2 text-[10px] text-muted-foreground uppercase font-bold hidden sm:inline">Speed:</span>
+              {[
+                { label: '0.5x Slow', value: 0.5 },
+                { label: '1x Normal', value: 1 },
+                { label: '2x Fast', value: 2 },
+              ].map((spd) => (
+                <button
+                  key={spd.value}
+                  type="button"
+                  onClick={() => setSpeedMultiplier(spd.value)}
+                  className={`px-2 py-1 rounded text-[11px] font-semibold transition-all ${
+                    speedMultiplier === spd.value
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {spd.label}
+                </button>
+              ))}
+            </div>
+
             {/* Scenario Selector Dropdown */}
             <select
               value={selectedScenarioId}
@@ -360,7 +462,7 @@ export default function ArenaPage() {
               size="sm"
               onClick={handleStart}
               loading={loading}
-              className="h-8 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-600/25 px-4"
+              className="h-8 bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs shadow-md shadow-violet-600/25 px-4"
             >
               <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
               <span>Start</span>
@@ -435,7 +537,7 @@ export default function ArenaPage() {
         <Card className="bg-card/75 border-border/80 backdrop-blur-md animate-in fade-in-0 duration-200">
           <CardHeader className="py-3 px-6 border-b border-border/60 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <Info className="w-4 h-4 text-cyan-400" />
+              <Info className="w-4 h-4 text-violet-400" />
               <CardTitle className="text-sm font-semibold">
                 Event Telemetry Detail: {selectedEvent.title}
               </CardTitle>
@@ -486,10 +588,10 @@ export default function ArenaPage() {
       )}
 
       {/* 5. Bottom Banner Card (Matching reference design) */}
-      <div className="p-4 rounded-xl border border-border/80 bg-card/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 rounded-xl border border-violet-500/20 bg-card/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-blue-600/15 border border-blue-500/30 text-blue-400 flex items-center justify-center shadow-[0_0_12px_rgba(59,130,246,0.15)]">
-            <Shield className="w-5 h-5 text-blue-400" />
+          <div className="h-10 w-10 rounded-xl bg-violet-600/20 border border-violet-500/35 text-violet-400 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+            <Shield className="w-5 h-5 text-violet-400" />
           </div>
           <div>
             <h4 className="text-sm font-semibold text-foreground">Cyber Arena 3D Battlefield</h4>
@@ -504,7 +606,7 @@ export default function ArenaPage() {
             </Button>
           </Link>
           <Link href="/runs">
-            <Button size="sm" className="text-xs h-9 bg-blue-600 hover:bg-blue-500 text-white font-semibold">
+            <Button size="sm" className="text-xs h-9 bg-violet-600 hover:bg-violet-500 text-white font-semibold shadow-md shadow-violet-600/25">
               Enter Cyber Arena <ChevronRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           </Link>

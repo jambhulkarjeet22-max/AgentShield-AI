@@ -230,7 +230,7 @@ export default function SecurityEventsPage() {
                           key={log.event_id}
                           onClick={() => setSelectedLog(log)}
                           className={`cursor-pointer transition-colors ${
-                            isSelected ? 'bg-blue-600/15' : 'hover:bg-muted/20'
+                            isSelected ? 'bg-violet-600/20 text-violet-300' : 'hover:bg-muted/20'
                           }`}
                         >
                           <td className="px-4 py-3 text-muted-foreground text-[11px]" suppressHydrationWarning>
@@ -239,7 +239,7 @@ export default function SecurityEventsPage() {
                           <td className="px-4 py-3 font-semibold text-foreground">
                             {log.actor_id}
                           </td>
-                          <td className="px-4 py-3 text-cyan-400">{log.tool}</td>
+                          <td className="px-4 py-3 text-violet-400">{log.tool}</td>
                           <td className="px-4 py-3 text-foreground truncate max-w-[120px]">
                             {log.action}
                           </td>
@@ -263,7 +263,7 @@ export default function SecurityEventsPage() {
                                 e.stopPropagation();
                                 setSelectedLog(log);
                               }}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-semibold"
+                              className="text-xs text-violet-400 hover:text-violet-300 font-semibold"
                             >
                               Details
                             </button>
@@ -286,7 +286,7 @@ export default function SecurityEventsPage() {
             <div className="px-4 py-2.5 bg-muted/20 text-[11px] text-muted-foreground flex items-center justify-between font-mono">
               <span>Showing {filtered.length} of {logs.length} recorded events</span>
               <span className="text-[10px] text-muted-foreground/80 flex items-center gap-1.5 font-sans">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
                 Scrollable Ledger Active
               </span>
             </div>

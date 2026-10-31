@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 export interface BattlefieldMaze3DProps {
   simulationState: 'IDLE' | 'ATTACKING' | 'DEFENDING' | 'BLOCKED' | 'BREACHED';
@@ -29,10 +30,10 @@ function createToolBillboardTexture(tool: 'FILES' | 'MAILBOX' | 'BROWSER' | 'PAY
   ctx.clearRect(0, 0, 512, 512);
 
   // Outer glowing card
-  ctx.fillStyle = 'rgba(6, 18, 42, 0.85)';
-  ctx.strokeStyle = '#00e5ff';
+  ctx.fillStyle = 'rgba(21, 11, 36, 0.92)';
+  ctx.strokeStyle = '#a855f7';
   ctx.lineWidth = 14;
-  ctx.shadowColor = '#00e5ff';
+  ctx.shadowColor = '#a855f7';
   ctx.shadowBlur = 24;
 
   const r = 40;
@@ -73,7 +74,7 @@ function createToolBillboardTexture(tool: 'FILES' | 'MAILBOX' | 'BROWSER' | 'PAY
     ctx.lineTo(cx - 100, cy + 70);
     ctx.closePath();
     ctx.stroke();
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.25)';
+    ctx.fillStyle = 'rgba(168, 85, 247, 0.25)';
     ctx.fill();
   } else if (tool === 'MAILBOX') {
     // Envelope Icon
@@ -102,13 +103,13 @@ function createToolBillboardTexture(tool: 'FILES' | 'MAILBOX' | 'BROWSER' | 'PAY
     ctx.moveTo(cx - 100, cy - 20);
     ctx.lineTo(cx + 100, cy - 20);
     ctx.stroke();
-    ctx.fillStyle = '#00e5ff';
+    ctx.fillStyle = '#a855f7';
     ctx.fillRect(cx - 75, cy + 15, 45, 30);
   }
 
   // Label text at bottom
   ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = '#00e5ff';
+  ctx.shadowColor = '#a855f7';
   ctx.shadowBlur = 16;
   ctx.font = 'bold 54px "Courier New", monospace, sans-serif';
   ctx.textAlign = 'center';
@@ -250,8 +251,34 @@ export function BattlefieldMaze3D({
   lastEvent,
   onNodeClick,
 }: BattlefieldMaze3DProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (wrapperRef.current?.requestFullscreen) {
+          await wrapperRef.current.requestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      }
+    } catch (e) {
+      console.warn('Fullscreen request failed:', e);
+    }
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -262,8 +289,8 @@ export function BattlefieldMaze3D({
     const height = container.clientHeight || 520;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x040814);
-    scene.fog = new THREE.FogExp2(0x040814, 0.022);
+    scene.background = new THREE.Color(0x08050e);
+    scene.fog = new THREE.FogExp2(0x08050e, 0.022);
 
     const camera = new THREE.PerspectiveCamera(46, width / height, 0.1, 1000);
     // Isometric angle viewing the battlefield
@@ -278,14 +305,14 @@ export function BattlefieldMaze3D({
     container.appendChild(renderer.domElement);
 
     // 2. Lighting
-    const ambientLight = new THREE.AmbientLight(0x0a1936, 1.8);
+    const ambientLight = new THREE.AmbientLight(0x190d2e, 1.8);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0x00d2ff, 1.4);
+    const mainLight = new THREE.DirectionalLight(0xa855f7, 1.4);
     mainLight.position.set(5, 20, 10);
     scene.add(mainLight);
 
-    const centerPointLight = new THREE.PointLight(0x00f0ff, 2.5, 18);
+    const centerPointLight = new THREE.PointLight(0xc084fc, 2.5, 18);
     centerPointLight.position.set(0, 3, 0);
     scene.add(centerPointLight);
 
@@ -293,7 +320,7 @@ export function BattlefieldMaze3D({
     const floorGeo = new THREE.PlaneGeometry(32, 24);
     floorGeo.rotateX(-Math.PI / 2);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x050b18,
+      color: 0x0d0817,
       roughness: 0.4,
       metalness: 0.8,
     });
@@ -301,8 +328,8 @@ export function BattlefieldMaze3D({
     floorMesh.position.y = -0.05;
     scene.add(floorMesh);
 
-    // Blue isometric grid overlay
-    const gridHelper = new THREE.GridHelper(30, 30, 0x0055aa, 0x001833);
+    // Violet isometric grid overlay
+    const gridHelper = new THREE.GridHelper(30, 30, 0xa855f7, 0x241438);
     gridHelper.position.y = 0.0;
     scene.add(gridHelper);
 
@@ -311,13 +338,13 @@ export function BattlefieldMaze3D({
     scene.add(wallGroup);
 
     const wallMaterial = new THREE.MeshStandardMaterial({
-      color: 0x071530,
+      color: 0x150b24,
       roughness: 0.25,
       metalness: 0.85,
     });
 
     const edgeMaterial = new THREE.LineBasicMaterial({
-      color: 0x00e5ff,
+      color: 0xc084fc,
       linewidth: 2,
     });
 
@@ -376,8 +403,8 @@ export function BattlefieldMaze3D({
     // Hexagonal Pedestal
     const hexPedestalGeo = new THREE.CylinderGeometry(2.1, 2.3, 0.45, 6);
     const hexPedestalMat = new THREE.MeshStandardMaterial({
-      color: 0x061e40,
-      emissive: 0x004488,
+      color: 0x1c0f30,
+      emissive: 0x6b21a8,
       emissiveIntensity: 0.6,
       roughness: 0.2,
       metalness: 0.9,
@@ -386,11 +413,11 @@ export function BattlefieldMaze3D({
     hexMesh.position.y = 0.22;
     targetGroup.add(hexMesh);
 
-    // Concentric glowing cyan ring
+    // Concentric glowing violet ring
     const hexRingGeo = new THREE.RingGeometry(2.35, 2.55, 32);
     hexRingGeo.rotateX(-Math.PI / 2);
     const hexRingMat = new THREE.MeshBasicMaterial({
-      color: 0x00f0ff,
+      color: 0xa855f7,
       side: THREE.DoubleSide,
     });
     const hexRing = new THREE.Mesh(hexRingGeo, hexRingMat);
@@ -410,8 +437,8 @@ export function BattlefieldMaze3D({
     const extrudeSettings = { depth: 0.25, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.08, bevelThickness: 0.08 };
     const shieldGeo = new THREE.ExtrudeGeometry(shieldShape, extrudeSettings);
     const shieldMat = new THREE.MeshStandardMaterial({
-      color: 0x00e5ff,
-      emissive: 0x0088cc,
+      color: 0xa855f7,
+      emissive: 0x7c3aed,
       emissiveIntensity: 0.9,
       roughness: 0.1,
       metalness: 0.95,
@@ -431,7 +458,7 @@ export function BattlefieldMaze3D({
     targetGroup.add(coreMesh);
 
     // Target AI Label Sprite below shield
-    const targetAILabelTexture = createPillBadgeTexture('TARGET AI', 'rgba(0, 34, 76, 0.9)', '#00e5ff');
+    const targetAILabelTexture = createPillBadgeTexture('TARGET AI', 'rgba(36, 17, 56, 0.9)', '#c084fc');
     const targetAILabelMat = new THREE.SpriteMaterial({ map: targetAILabelTexture, transparent: true });
     const targetAISprite = new THREE.Sprite(targetAILabelMat);
     targetAISprite.scale.set(3.0, 0.85, 1);
@@ -459,8 +486,8 @@ export function BattlefieldMaze3D({
       // Elevated round pedestal with neon ring
       const baseGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.35, 24);
       const baseMat = new THREE.MeshStandardMaterial({
-        color: 0x051833,
-        emissive: 0x003366,
+        color: 0x160c28,
+        emissive: 0x4c1d95,
         roughness: 0.2,
         metalness: 0.9,
       });
@@ -470,7 +497,7 @@ export function BattlefieldMaze3D({
 
       const ringGeo = new THREE.RingGeometry(1.85, 2.05, 32);
       ringGeo.rotateX(-Math.PI / 2);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, side: THREE.DoubleSide });
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, side: THREE.DoubleSide });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.position.y = 0.05;
       nodeGroup.add(ringMesh);
@@ -506,7 +533,7 @@ export function BattlefieldMaze3D({
     ];
 
     cubePositions.forEach((pos, idx) => {
-      const colors = [0x00f0ff, 0x0077ff, 0x10b981];
+      const colors = [0xa855f7, 0xc084fc, 0x818cf8];
       const cubeGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
       const cubeMat = new THREE.MeshStandardMaterial({
         color: colors[idx % colors.length],
@@ -560,11 +587,11 @@ export function BattlefieldMaze3D({
     blueTeamGroup.position.set(4.5, 0.35, 1.5); // Initial defensive corridor
     scene.add(blueTeamGroup);
 
-    const blueMesh = createCyberAgentMesh(0x00d2ff, 0x0066aa);
+    const blueMesh = createCyberAgentMesh(0x818cf8, 0x4f46e5);
     blueTeamGroup.add(blueMesh);
 
     // Floating BLUE TEAM pill badge
-    const blueBadgeTex = createPillBadgeTexture('BLUE TEAM', '#0284c7');
+    const blueBadgeTex = createPillBadgeTexture('BLUE TEAM', '#4f46e5');
     const blueBadgeMat = new THREE.SpriteMaterial({ map: blueBadgeTex, transparent: true });
     const blueBadgeSprite = new THREE.Sprite(blueBadgeMat);
     blueBadgeSprite.scale.set(2.2, 0.65, 1);
@@ -574,8 +601,8 @@ export function BattlefieldMaze3D({
     // Defensive Interception Shield Dome (Activates when BLOCKED or DEFENDING)
     const defenseDomeGeo = new THREE.SphereGeometry(1.6, 24, 16);
     const defenseDomeMat = new THREE.MeshStandardMaterial({
-      color: 0x00e5ff,
-      emissive: 0x0088cc,
+      color: 0xa855f7,
+      emissive: 0x7c3aed,
       transparent: true,
       opacity: 0.0,
       wireframe: true,
@@ -619,34 +646,34 @@ export function BattlefieldMaze3D({
         cube.position.y = 0.45 + Math.sin(elapsed * 3 + i) * 0.08;
       });
 
-      // Dynamic Agent Positioning based on simulation state
+      // Dynamic Agent Positioning based on simulation state (Slow, smooth glide)
       const targetPos = getDestinationCoordinates(currentTargetTool);
 
       if (simulationState === 'ATTACKING') {
-        // Red team moves aggressively towards target
-        redTeamGroup.position.lerp(targetPos, 0.04);
-        redTeamGroup.rotation.y = Math.sin(elapsed * 6) * 0.2;
-        blueTeamGroup.position.lerp(new THREE.Vector3(targetPos.x * 0.5, 0.35, targetPos.z * 0.5), 0.03);
+        // Red team moves towards target with deliberate pacing
+        redTeamGroup.position.lerp(targetPos, 0.022);
+        redTeamGroup.rotation.y = Math.sin(elapsed * 3.5) * 0.15;
+        blueTeamGroup.position.lerp(new THREE.Vector3(targetPos.x * 0.45, 0.35, targetPos.z * 0.45), 0.018);
         defenseDomeMat.opacity = 0.2;
       } else if (simulationState === 'DEFENDING') {
         // Blue team rushes to intercept at intersection
-        const interceptPoint = new THREE.Vector3(targetPos.x * 0.75, 0.35, targetPos.z * 0.75);
-        blueTeamGroup.position.lerp(interceptPoint, 0.06);
-        defenseDomeMat.opacity = 0.5 + Math.sin(elapsed * 10) * 0.25;
+        const interceptPoint = new THREE.Vector3(targetPos.x * 0.72, 0.35, targetPos.z * 0.72);
+        blueTeamGroup.position.lerp(interceptPoint, 0.035);
+        defenseDomeMat.opacity = 0.5 + Math.sin(elapsed * 6) * 0.25;
       } else if (simulationState === 'BLOCKED') {
         // Red pushed back, defensive dome flares
         const pushback = new THREE.Vector3(targetPos.x * 0.4 - 1.5, 0.35, targetPos.z * 0.4);
-        redTeamGroup.position.lerp(pushback, 0.05);
+        redTeamGroup.position.lerp(pushback, 0.025);
         defenseDomeMat.opacity = 0.65;
-        defenseDome.rotation.y = elapsed * 2.0;
+        defenseDome.rotation.y = elapsed * 1.5;
       } else if (simulationState === 'BREACHED') {
         // Red team reaches destination, red alarm
-        redTeamGroup.position.lerp(targetPos, 0.08);
+        redTeamGroup.position.lerp(targetPos, 0.035);
         defenseDomeMat.opacity = 0.0;
       } else {
         // IDLE: Patrol hover around starting corridors
-        redTeamGroup.position.lerp(new THREE.Vector3(-4.5, 0.35 + Math.sin(elapsed * 2) * 0.06, -2.0), 0.05);
-        blueTeamGroup.position.lerp(new THREE.Vector3(4.5, 0.35 + Math.sin(elapsed * 2 + 1) * 0.06, 1.5), 0.05);
+        redTeamGroup.position.lerp(new THREE.Vector3(-4.5, 0.35 + Math.sin(elapsed * 1.5) * 0.05, -2.0), 0.022);
+        blueTeamGroup.position.lerp(new THREE.Vector3(4.5, 0.35 + Math.sin(elapsed * 1.5 + 1) * 0.05, 1.5), 0.022);
         defenseDomeMat.opacity = 0.0;
       }
 
@@ -655,20 +682,22 @@ export function BattlefieldMaze3D({
 
     animate();
 
-    // 11. Window Resize Handling
+    // 11. Window Resize & Fullscreen Handling
     const handleResize = () => {
       if (!container) return;
-      const newW = container.clientWidth;
-      const newH = container.clientHeight || 520;
+      const newW = container.clientWidth || window.innerWidth;
+      const newH = container.clientHeight || (document.fullscreenElement ? window.innerHeight : 520);
       camera.aspect = newW / newH;
       camera.updateProjectionMatrix();
       renderer.setSize(newW, newH);
     };
 
     window.addEventListener('resize', handleResize);
+    document.addEventListener('fullscreenchange', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('fullscreenchange', handleResize);
       cancelAnimationFrame(animFrameId);
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -678,44 +707,64 @@ export function BattlefieldMaze3D({
   }, [simulationState, currentTargetTool]);
 
   return (
-    <div className="relative w-full h-[520px] rounded-xl overflow-hidden bg-[#040814] select-none">
+    <div
+      ref={wrapperRef}
+      className={`relative w-full ${
+        isFullscreen ? 'h-screen w-screen rounded-none z-50 fixed inset-0' : 'h-[520px] rounded-xl'
+      } overflow-hidden bg-[#08050e] select-none border border-violet-900/30 transition-all duration-200`}
+    >
       {/* 3D WebGL Canvas Container */}
       <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Subtle Corner HUD Elements */}
-      <div className="absolute top-3 left-4 flex items-center gap-2 pointer-events-none">
-        <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00e5ff]" />
-        <span className="text-[11px] font-mono font-semibold tracking-wider text-cyan-300/90 uppercase">
+      <div className="absolute top-3 left-4 flex items-center gap-2 pointer-events-none z-20">
+        <span className="h-2 w-2 rounded-full bg-violet-400 animate-pulse shadow-[0_0_8px_#a855f7]" />
+        <span className="text-[11px] font-mono font-semibold tracking-wider text-violet-300/90 uppercase">
           CYBER BATTLEFIELD // 3D MAZE ACTIVE
         </span>
       </div>
 
-      {/* Target Tool Focus Pill (if active) */}
-      {currentTargetTool && (
-        <div className="absolute top-3 right-4 px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/40 backdrop-blur-md flex items-center gap-2 pointer-events-none">
-          <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold">Targeted Node:</span>
-          <span className="text-xs font-bold text-white tracking-wide">{currentTargetTool}</span>
-        </div>
-      )}
+      {/* Top Right Controls: Target Tool Focus Pill + Fullscreen Toggle */}
+      <div className="absolute top-3 right-4 z-20 flex items-center gap-2.5">
+        {currentTargetTool && (
+          <div className="px-3 py-1 rounded-full bg-violet-950/80 border border-violet-500/40 backdrop-blur-md flex items-center gap-2 pointer-events-none">
+            <span className="text-[10px] font-mono text-violet-400 uppercase font-bold">Targeted Node:</span>
+            <span className="text-xs font-bold text-white tracking-wide">{currentTargetTool}</span>
+          </div>
+        )}
+
+        <button
+          onClick={toggleFullscreen}
+          title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Expand Battlefield to Fullscreen'}
+          aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+          className="h-8 w-8 rounded-lg bg-violet-950/80 hover:bg-violet-900 border border-violet-500/40 flex items-center justify-center text-violet-300 hover:text-white transition-all duration-200 shadow-md shadow-violet-950/40 hover:scale-105 active:scale-95 cursor-pointer backdrop-blur-md"
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-4 h-4 text-violet-300 hover:text-white" />
+          ) : (
+            <Maximize2 className="w-4 h-4 text-violet-300 hover:text-white" />
+          )}
+        </button>
+      </div>
 
       {/* Bottom Status Legend */}
-      <div className="absolute bottom-3 left-4 right-4 flex flex-wrap items-center justify-between text-[11px] font-mono text-muted-foreground/80 pointer-events-none">
-        <div className="flex items-center gap-4 bg-slate-950/60 px-3 py-1.5 rounded-lg border border-slate-800/60 backdrop-blur-sm">
+      <div className="absolute bottom-3 left-4 right-4 z-20 flex flex-wrap items-center justify-between text-[11px] font-mono text-muted-foreground/80 pointer-events-none">
+        <div className="flex items-center gap-4 bg-black/75 px-3 py-1.5 rounded-lg border border-violet-900/40 backdrop-blur-sm">
           <span className="flex items-center gap-1.5 text-rose-400">
             <span className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_6px_#f43f5e]" /> Red Team Attacker
           </span>
-          <span className="flex items-center gap-1.5 text-cyan-400">
-            <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#06b6d4]" /> Target AI Core
+          <span className="flex items-center gap-1.5 text-violet-400">
+            <span className="h-2 w-2 rounded-full bg-violet-400 shadow-[0_0_6px_#a855f7]" /> Target AI Core
           </span>
-          <span className="flex items-center gap-1.5 text-sky-400">
-            <span className="h-2 w-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]" /> Blue Team Defender
+          <span className="flex items-center gap-1.5 text-indigo-400">
+            <span className="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_6px_#818cf8]" /> Blue Team Defender
           </span>
           <span className="flex items-center gap-1.5 text-emerald-400">
             <span className="h-2 w-2 rounded-full bg-emerald-400" /> Protected Tools
           </span>
         </div>
-        <div className="text-[10px] text-slate-500 hidden sm:block">
-          PAC-MAN TACTICAL PROTOCOL V2 // 60 FPS
+        <div className="text-[10px] text-zinc-500 hidden sm:block font-mono">
+          CYBER VIOLET DEFENSE GRID // 60 FPS
         </div>
       </div>
     </div>

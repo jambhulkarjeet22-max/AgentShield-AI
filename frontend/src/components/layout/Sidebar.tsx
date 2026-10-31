@@ -3,19 +3,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  ShieldAlert,
-  Swords,
-  Bot,
-  FileCode2,
-  PlayCircle,
-  BrainCircuit,
-  ScrollText,
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  Shield,
-} from 'lucide-react';
+  Shield01Icon,
+  ShieldAlertIcon,
+  SwordsIcon,
+  BotIcon,
+  FileCodeIcon,
+  PlayCircleIcon,
+  BrainIcon,
+  ScrollIcon,
+  BarChartIcon,
+} from '@hugeicons/core-free-icons';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -27,14 +27,14 @@ export function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const pathname = usePathname();
 
   const navigation = [
-    { name: 'Overview', href: '/dashboard', icon: Shield },
-    { name: 'Cyber Arena', href: '/arena', icon: Swords, badge: '3D' },
-    { name: 'Agents', href: '/agents', icon: Bot },
-    { name: 'Test Scenarios', href: '/scenarios', icon: FileCode2 },
-    { name: 'Test Runs', href: '/test-runs', icon: PlayCircle },
-    { name: 'Adaptive Learning', href: '/learning', icon: BrainCircuit },
-    { name: 'Security Events', href: '/events', icon: ScrollText },
-    { name: 'Reports', href: '/reports', icon: BarChart3 },
+    { name: 'Overview', href: '/dashboard', icon: Shield01Icon },
+    { name: 'Cyber Arena', href: '/arena', icon: SwordsIcon, badge: '3D' },
+    { name: 'Agents', href: '/agents', icon: BotIcon },
+    { name: 'Test Scenarios', href: '/scenarios', icon: FileCodeIcon },
+    { name: 'Test Runs', href: '/test-runs', icon: PlayCircleIcon },
+    { name: 'Adaptive Learning', href: '/learning', icon: BrainIcon },
+    { name: 'Security Events', href: '/events', icon: ScrollIcon },
+    { name: 'Reports', href: '/reports', icon: BarChartIcon },
   ];
 
   return (
@@ -47,8 +47,8 @@ export function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
       {/* Brand logo */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-border/80">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 shadow-sm shadow-blue-500/20">
-            <ShieldAlert className="w-5 h-5" />
+          <div className="h-9 w-9 rounded-lg bg-violet-600/20 border border-violet-500/40 flex items-center justify-center text-violet-400 shadow-sm shadow-violet-500/30">
+            <HugeiconsIcon icon={ShieldAlertIcon} size={20} />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
@@ -82,21 +82,23 @@ export function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
               className={cn(
                 'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
                 isActive
-                  ? 'bg-blue-600/15 text-blue-400 border border-blue-500/30 shadow-sm shadow-blue-500/10'
+                  ? 'bg-violet-600/20 text-violet-300 border border-violet-500/40 shadow-sm shadow-violet-500/20'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/40 border border-transparent'
               )}
             >
-              <Icon
+              <HugeiconsIcon
+                icon={Icon}
+                size={20}
                 className={cn(
-                  'w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110',
-                  isActive ? 'text-blue-400' : 'text-muted-foreground'
+                  'flex-shrink-0 transition-transform group-hover:scale-110',
+                  isActive ? 'text-violet-400' : 'text-muted-foreground'
                 )}
               />
               {!collapsed && (
                 <div className="flex-1 flex items-center justify-between overflow-hidden">
                   <span className="truncate">{item.name}</span>
                   {item.badge && (
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-violet-500/25 text-violet-300 border border-violet-500/35">
                       {item.badge}
                     </span>
                   )}

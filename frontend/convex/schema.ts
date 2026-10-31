@@ -74,10 +74,5 @@ export default defineSchema({
     severity: v.string(),
     expected_outcome: v.string(),
   }).index("by_attack_id", ["attack_id"]),
-
-  messages: defineTable({
-    body: v.string(),
-    author: v.string(),
-  }).index("by_author", ["author"]),
 });
 

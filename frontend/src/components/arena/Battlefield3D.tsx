@@ -34,7 +34,7 @@ export function Battlefield3D({ simulationState, activeScenario }: Battlefield3D
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0x3b82f6, 1.2);
+    const dirLight = new THREE.DirectionalLight(0xa855f7, 1.2);
     dirLight.position.set(10, 20, 10);
     scene.add(dirLight);
 
@@ -47,7 +47,7 @@ export function Battlefield3D({ simulationState, activeScenario }: Battlefield3D
     scene.add(blueLight);
 
     // 3. Futuristic Grid Floor
-    const gridHelper = new THREE.GridHelper(30, 30, 0x1e3a8a, 0x0f172a);
+    const gridHelper = new THREE.GridHelper(30, 30, 0xa855f7, 0x180c29);
     gridHelper.position.y = -2;
     scene.add(gridHelper);
 
@@ -83,9 +83,9 @@ export function Battlefield3D({ simulationState, activeScenario }: Battlefield3D
     // Blue Defense Shield (Hemisphere over Target/Tools)
     const shieldGeo = new THREE.SphereGeometry(3.5, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
     const shieldMat = new THREE.MeshStandardMaterial({
-      color: 0x3b82f6,
+      color: 0xa855f7,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.4,
       wireframe: true,
       side: THREE.DoubleSide,
     });
@@ -225,7 +225,7 @@ export function Battlefield3D({ simulationState, activeScenario }: Battlefield3D
               ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
               : simulationState === 'ATTACKING'
               ? 'bg-rose-500/20 text-rose-400 border-rose-500/30 animate-pulse'
-              : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+              : 'bg-violet-500/20 text-violet-400 border-violet-500/30'
           }`}
         >
           SIMULATION STATUS: {simulationState}
@@ -242,7 +242,7 @@ export function Battlefield3D({ simulationState, activeScenario }: Battlefield3D
             <span className="h-2 w-2 rounded-full bg-cyan-400" /> Target AI
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-blue-500" /> Blue Shield
+            <span className="h-2 w-2 rounded-full bg-violet-500" /> Guardian Shield
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-400" /> Mock Tools

@@ -7,26 +7,26 @@
 @layer base {
   :root,
   .dark {
-    /* Primary Dark Theme (Coolors: #101f3d, #19365c, #345a85, #5d91b5, #f5f7fa) */
-    --background: 220 58% 15%;        /* #101f3d Deep Prussian Navy */
-    --foreground: 216 38% 97%;         /* #f5f7fa Ghost / Ice White */
-    --card: 214 57% 23%;               /* #19365c Dark Blue Gray */
-    --card-foreground: 216 38% 97%;    /* #f5f7fa */
-    --popover: 214 57% 23%;            /* #19365c */
-    --popover-foreground: 216 38% 97%; /* #f5f7fa */
-    --primary: 205 45% 54%;            /* #5d91b5 Steel Cerulean */
-    --primary-foreground: 220 58% 12%; /* #101f3d Dark contrast */
-    --secondary: 212 44% 36%;          /* #345a85 Slate Steel Blue */
-    --secondary-foreground: 216 38% 97%;/* #f5f7fa */
-    --muted: 214 45% 20%;              /* Dark Muted Blue */
-    --muted-foreground: 208 25% 75%;   /* Readable Muted Text */
-    --accent: 212 44% 36%;             /* #345a85 */
-    --accent-foreground: 216 38% 97%;  /* #f5f7fa */
+    /* Violet and Deep Black Obsidian Theme */
+    --background: 260 45% 4%;          /* #08050e - Deepest Obsidian Black with subtle violet depth */
+    --foreground: 260 25% 98%;         /* #f8f6fc - Crisp Lilac White */
+    --card: 265 35% 8%;                /* #120b1c - Luxurious Dark Obsidian-Violet Card */
+    --card-foreground: 260 25% 98%;    /* #f8f6fc */
+    --popover: 265 35% 8%;             /* #120b1c */
+    --popover-foreground: 260 25% 98%; /* #f8f6fc */
+    --primary: 265 89% 66%;            /* #a855f7 - Electric Cyber Violet */
+    --primary-foreground: 0 0% 100%;   /* #ffffff */
+    --secondary: 265 28% 16%;          /* #241636 - Deep Velvet Violet */
+    --secondary-foreground: 260 25% 98%;/* #f8f6fc */
+    --muted: 265 25% 12%;              /* #181024 - Muted Obsidian Violet */
+    --muted-foreground: 260 18% 70%;   /* #b2a8c2 - Soft Lilac Mist */
+    --accent: 265 45% 22%;             /* #391c57 - Glowing Violet Accent */
+    --accent-foreground: 260 25% 98%;  /* #f8f6fc */
     --destructive: 0 72% 51%;
-    --destructive-foreground: 216 38% 97%;
-    --border: 212 40% 32%;             /* #345a85 Steel Border */
-    --input: 212 40% 32%;              /* #345a85 */
-    --ring: 205 50% 60%;               /* #5d91b5 Focus Ring */
+    --destructive-foreground: 260 25% 98%;
+    --border: 265 24% 17%;             /* #281938 - Violet Glass Border */
+    --input: 265 24% 17%;              /* #281938 */
+    --ring: 265 89% 66%;               /* #a855f7 - Cyber Violet Ring */
     --radius: 0.5rem;
   }
 
@@ -75,22 +75,22 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(16, 31, 61, 0.6);
+  background: rgba(8, 5, 14, 0.85);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(93, 145, 181, 0.4);
+  background: rgba(168, 85, 247, 0.35);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(93, 145, 181, 0.7);
+  background: rgba(168, 85, 247, 0.65);
 }
 
-/* Dedicated Scroller for Terminal & JSON Records */
+/* Dedicated Scroller for Terminal, Tables & JSON Records */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(93, 145, 181, 0.45) rgba(16, 31, 61, 0.7);
+  scrollbar-color: rgba(168, 85, 247, 0.45) rgba(14, 9, 24, 0.85);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -99,45 +99,45 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(16, 31, 61, 0.7);
+  background: rgba(14, 9, 24, 0.85);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(93, 145, 181, 0.45);
+  background: rgba(168, 85, 247, 0.45);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(93, 145, 181, 0.75);
+  background: rgba(168, 85, 247, 0.75);
 }
 
 /* Light Theme Scrollbars */
 .light ::-webkit-scrollbar-track {
-  background: rgba(218, 215, 205, 0.6);
+  background: rgba(240, 235, 248, 0.8);
 }
 
 .light ::-webkit-scrollbar-thumb {
-  background: rgba(88, 129, 87, 0.45);
+  background: rgba(168, 85, 247, 0.4);
 }
 
 .light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(88, 129, 87, 0.75);
+  background: rgba(168, 85, 247, 0.7);
 }
 
 .light .custom-scrollbar {
-  scrollbar-color: rgba(88, 129, 87, 0.45) rgba(218, 215, 205, 0.7);
+  scrollbar-color: rgba(168, 85, 247, 0.4) rgba(240, 235, 248, 0.8);
 }
 
 .light .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(218, 215, 205, 0.7);
+  background: rgba(240, 235, 248, 0.8);
 }
 
 .light .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(88, 129, 87, 0.45);
+  background: rgba(168, 85, 247, 0.4);
 }
 
 .light .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(88, 129, 87, 0.75);
+  background: rgba(168, 85, 247, 0.7);
 }
 

@@ -31,6 +31,32 @@ export const record = mutation({
   },
 });
 
+export const recordBatch = mutation({
+  args: {
+    events: v.array(
+      v.object({
+        event_id: v.string(),
+        timestamp: v.string(),
+        actor_id: v.string(),
+        role: v.string(),
+        tool: v.string(),
+        action: v.string(),
+        status: v.string(),
+        resource: v.optional(v.string()),
+        details: v.optional(v.any()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const ids = [];
+    for (const evt of args.events) {
+      const id = await ctx.db.insert("audit_logs", evt);
+      ids.push(id);
+    }
+    return { count: ids.length, ids };
+  },
+});
+
 export const clearAll = mutation({
   args: {},
   handler: async (ctx) => {

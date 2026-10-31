@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "frontend": "cd frontend && pnpm dev",
+    "backend": ".venv\\Scripts\\uvicorn backend.app.main:app --port 8000 --reload",
+    "ml": ".venv\\Scripts\\uvicorn ml-model.api.app:app --port 8001 --reload",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

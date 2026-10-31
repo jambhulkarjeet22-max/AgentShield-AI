@@ -9,8 +9,10 @@
  */
 
 import type * as campaigns from "../campaigns.js";
+import type * as catalog from "../catalog.js";
 import type * as events from "../events.js";
 import type * as guardian from "../guardian.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -20,8 +22,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   campaigns: typeof campaigns;
+  catalog: typeof catalog;
   events: typeof events;
   guardian: typeof guardian;
+  seed: typeof seed;
 }>;
 
 /**
