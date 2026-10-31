@@ -77,6 +77,20 @@ class BlueTeamGuardian:
         except Exception:
             pass
 
+        # Send guardrail evaluation trace to Langfuse
+        try:
+            from backend.app.services.langfuse_service import langfuse_service
+            langfuse_service.trace_guardian_evaluation(
+                actor_id=actor.actor_id,
+                role=actor.role.value,
+                task_id=task_id,
+                step_number=step_number,
+                proposal=proposal,
+                verdict=verdict,
+            )
+        except Exception:
+            pass
+
         # Audit event
         audit_status = (
             "ALLOWED" if verdict.verdict == GuardianDecision.ALLOW

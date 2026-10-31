@@ -80,6 +80,13 @@ class Settings(BaseSettings):
     LLM_API_KEY: Optional[str] = Field(default=None, description="API key for external LLM provider")
     LLM_BASE_URL: Optional[str] = Field(default=None, description="Base URL for external LLM provider")
 
+    # Langfuse Observability & Agent Tracing
+    LANGFUSE_SECRET_KEY: Optional[str] = Field(default=None, description="Langfuse secret key")
+    LANGFUSE_PUBLIC_KEY: Optional[str] = Field(default=None, description="Langfuse public key")
+    LANGFUSE_HOST: str = Field(default="https://cloud.langfuse.com", description="Langfuse server host")
+    LANGFUSE_BASE_URL: Optional[str] = Field(default=None, description="Alternative Langfuse base URL")
+    LANGFUSE_ENABLED: bool = Field(default=True, description="Enable Langfuse observability tracing")
+
     # Logging
     LOG_LEVEL: str = Field(default="INFO", description="Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL")
     LOG_FORMAT: str = Field(

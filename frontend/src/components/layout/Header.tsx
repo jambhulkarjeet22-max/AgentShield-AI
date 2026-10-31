@@ -44,6 +44,19 @@ export function Header() {
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
+        {/* Langfuse Observability Link */}
+        <a
+          href="https://cloud.langfuse.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open Langfuse LLM Observability & Traces Console"
+          className="flex items-center gap-1.5 text-xs text-violet-300 hover:text-white bg-violet-950/60 border border-violet-500/40 hover:bg-violet-900/60 px-2.5 py-1.5 rounded-lg transition-all shadow-sm shadow-violet-950/40"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+          <span className="font-mono text-[11px] font-semibold">Langfuse</span>
+          <span className="text-[10px] text-violet-400">↗</span>
+        </a>
+
         {/* Reset State Action */}
         <button
           onClick={handleReset}

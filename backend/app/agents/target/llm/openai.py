@@ -47,11 +47,12 @@ class OpenAICompatibleProvider(BaseLLMProvider):
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
+        user_prompt = f"Task: {instruction}\nContext: {json.dumps(context or {})}"
         payload = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Task: {instruction}\nContext: {json.dumps(context or {})}"},
+                {"role": "user", "content": user_prompt},
             ],
             "temperature": 0.0,
         }
@@ -62,6 +63,20 @@ class OpenAICompatibleProvider(BaseLLMProvider):
             data = resp.json()
 
         content = data["choices"][0]["message"]["content"].strip()
+
+        # Send LLM generation trace to Langfuse
+        try:
+            from backend.app.services.langfuse_service import langfuse_service
+            langfuse_service.trace_llm_generation(
+                model=self.model,
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                output_content=content,
+                metadata={"usage": data.get("usage", {})},
+            )
+        except Exception:
+            pass
+
         # Clean json backticks if present
         if content.startswith("```json"):
             content = content[7:-3].strip()
@@ -91,21 +106,38 @@ class OpenAICompatibleProvider(BaseLLMProvider):
             {"step": s.step_number, "action": f"{s.tool}:{s.action}", "status": s.status, "output": s.output}
             for s in steps
         ]
+        system_prompt = "You are a cybersecurity reporting assistant. Summarize the steps concisely."
+        user_prompt = f"Original Instruction: {instruction}\nSteps: {json.dumps(steps_summary, default=str)}"
         payload = {
             "model": self.model,
             "messages": [
                 {
                     "role": "system",
-                    "content": "You are a cybersecurity reporting assistant. Summarize the steps concisely.",
+                    "content": system_prompt,
                 },
                 {
                     "role": "user",
-                    "content": f"Original Instruction: {instruction}\nSteps: {json.dumps(steps_summary, default=str)}",
+                    "content": user_prompt,
                 },
             ],
         }
         async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(f"{self.base_url}/chat/completions", headers=headers, json=payload)
             resp.raise_for_status()
-            return resp.json()["choices"][0]["message"]["content"].strip()
+            data = resp.json()
+            summary = data["choices"][0]["message"]["content"].strip()
 
+            # Send LLM summarization trace to Langfuse
+            try:
+                from backend.app.services.langfuse_service import langfuse_service
+                langfuse_service.trace_llm_generation(
+                    model=self.model,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    output_content=summary,
+                    metadata={"usage": data.get("usage", {})},
+                )
+            except Exception:
+                pass
+
+            return summary

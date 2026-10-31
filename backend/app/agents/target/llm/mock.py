@@ -334,6 +334,19 @@ class DeterministicMockPlanner(BaseLLMProvider):
                 )
             )
 
+        # Send LLM generation trace to Langfuse
+        try:
+            from backend.app.services.langfuse_service import langfuse_service
+            langfuse_service.trace_llm_generation(
+                model="mock-deterministic",
+                system_prompt="Deterministic Target Agent Business Planner",
+                user_prompt=instruction,
+                output_content=json.dumps([p.model_dump() for p in proposals]),
+                metadata={"num_proposals": len(proposals), "context": context},
+            )
+        except Exception:
+            pass
+
         return proposals
 
     async def summarize_results(

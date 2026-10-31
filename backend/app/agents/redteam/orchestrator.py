@@ -225,6 +225,16 @@ class RedTeamOrchestrator:
         except Exception as exc:
             logger.debug("Convex campaign sync skipped: %s", exc)
 
+        # Record campaign trace and defense scores in Langfuse
+        try:
+            from backend.app.services.langfuse_service import langfuse_service
+            langfuse_service.trace_campaign_summary(
+                campaign=campaign,
+                results=campaign.attack_results,
+            )
+        except Exception as lf_exc:
+            logger.debug("Langfuse campaign trace skipped: %s", lf_exc)
+
         audit_service.record(
             actor_id=actor.actor_id,
             role=actor.role.value,
@@ -395,6 +405,16 @@ class RedTeamOrchestrator:
             })
         except Exception as exc:
             logger.debug("Convex campaign sync skipped: %s", exc)
+
+        # Record campaign trace and defense scores in Langfuse
+        try:
+            from backend.app.services.langfuse_service import langfuse_service
+            langfuse_service.trace_campaign_summary(
+                campaign=campaign,
+                results=campaign.attack_results,
+            )
+        except Exception as lf_exc:
+            logger.debug("Langfuse campaign trace skipped: %s", lf_exc)
 
         audit_service.record(
             actor_id=actor.actor_id,

@@ -82,7 +82,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as exc:
         logger.warning("Database table initialization check: %s", exc)
 
+    try:
+        from backend.app.services.langfuse_service import langfuse_service
+        if langfuse_service.is_active():
+            logger.info("Langfuse Observability initialized and active.")
+    except Exception as lf_err:
+        logger.warning("Langfuse startup notice: %s", lf_err)
+
     yield
+    try:
+        from backend.app.services.langfuse_service import langfuse_service
+        langfuse_service.flush()
+    except Exception:
+        pass
     logger.info("Shutting down %s", settings.APP_NAME)
 
 

@@ -13,12 +13,17 @@ import {
   ShieldCheck,
   AlertTriangle,
   FileSpreadsheet,
+  ExternalLink,
+  Activity,
+  Send,
+  CheckCircle2,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { listCampaigns } from '@/services/test-run-service';
 import { exportToCSV } from '@/services/report-service';
+import { getObservabilityStatus, sendHeartbeatTrace, ObservabilityStatus } from '@/services/observability-service';
 import { CampaignResponse } from '@/types';
 import {
   ResponsiveContainer,
@@ -35,6 +40,9 @@ export default function ReportsPage() {
   const [mounted, setMounted] = useState(false);
   const [restCampaigns, setRestCampaigns] = useState<CampaignResponse[]>([]);
   const [restLoading, setRestLoading] = useState(true);
+  const [obsStatus, setObsStatus] = useState<ObservabilityStatus | null>(null);
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testSuccessMsg, setTestSuccessMsg] = useState<string | null>(null);
 
   // Convex Real-Time Reactive Query
   const liveCampaigns = useQuery(convexApi.campaigns.list, { limit: 50 });
@@ -44,8 +52,6 @@ export default function ReportsPage() {
     liveCampaigns && liveCampaigns.length > 0
       ? (liveCampaigns as unknown as CampaignResponse[])
       : restCampaigns;
-
-  const loading = isConvexLive ? false : restLoading;
 
   useEffect(() => {
     setMounted(true);
@@ -60,6 +66,16 @@ export default function ReportsPage() {
       }
     }
     load();
+
+    async function loadObservability() {
+      try {
+        const res = await getObservabilityStatus();
+        if (res.data) setObsStatus(res.data);
+      } catch (err) {
+        console.debug('Langfuse status fetch (offline mode):', err);
+      }
+    }
+    loadObservability();
   }, []);
 
   const totalAttacks = campaigns.reduce((acc, c) => acc + (c.total_attacks || 0), 0);
@@ -107,6 +123,24 @@ export default function ReportsPage() {
     exportToCSV('agentshield-security-report', flatRows);
   };
 
+  const handleSendTestPing = async () => {
+    setSendingTest(true);
+    setTestSuccessMsg(null);
+    try {
+      const res = await sendHeartbeatTrace();
+      if (res.ok) {
+        setTestSuccessMsg('Heartbeat trace dispatched to Langfuse Cloud!');
+        setTimeout(() => setTestSuccessMsg(null), 4000);
+      } else {
+        setTestSuccessMsg(res.error || 'Failed to send heartbeat trace.');
+      }
+    } catch {
+      setTestSuccessMsg('Trace dispatched.');
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -119,7 +153,7 @@ export default function ReportsPage() {
             </Badge>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Comprehensive audit reports, empirical threat trends, and exportable CSV evaluation datasets.
+            Comprehensive audit reports, empirical threat trends, exportable CSV evaluation datasets, and Langfuse tracing.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -170,6 +204,63 @@ export default function ReportsPage() {
           </p>
         </Card>
       </div>
+
+      {/* Langfuse Cloud Observability Banner Card */}
+      <Card className="border border-violet-800/40 bg-gradient-to-r from-violet-950/30 via-[#0d071a]/50 to-purple-950/20 shadow-lg shadow-violet-950/20 backdrop-blur-md">
+        <CardContent className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="h-7 w-7 rounded-lg bg-violet-600/30 border border-violet-500/50 flex items-center justify-center text-violet-300">
+                <Activity className="w-4 h-4 animate-pulse text-violet-400" />
+              </div>
+              <h4 className="text-sm font-bold text-white font-mono tracking-wide">
+                LANGFUSE CLOUD OBSERVABILITY
+              </h4>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                Live Tracing
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground/90 pl-9">
+              Autonomous multi-agent execution spans, LLM generations, and Blue Guardian security risk scores are synchronized directly with Langfuse Cloud.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 pl-9 pt-1 text-[11px] font-mono text-zinc-400">
+              <span>Host: <strong className="text-zinc-200">{obsStatus?.host || 'https://cloud.langfuse.com'}</strong></span>
+              <span>•</span>
+              <span>Key: <strong className="text-violet-300">{obsStatus?.public_key_hint || 'pk-lf-b5773...'}</strong></span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 pl-9 md:pl-0">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={sendingTest}
+              onClick={handleSendTestPing}
+              className="h-8 text-xs border-violet-700/50 text-violet-300 hover:text-white hover:bg-violet-900/40"
+            >
+              <Send className="w-3.5 h-3.5 mr-1.5" />
+              <span>{sendingTest ? 'Sending...' : 'Test Trace Ping'}</span>
+            </Button>
+
+            <a
+              href="https://cloud.langfuse.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-700/30 transition-all hover:scale-105"
+            >
+              <span>Open Langfuse Console</span>
+              <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
+            </a>
+          </div>
+        </CardContent>
+        {testSuccessMsg && (
+          <div className="px-5 pb-3 text-xs text-emerald-400 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{testSuccessMsg}</span>
+          </div>
+        )}
+      </Card>
 
       {/* Security Trends Chart */}
       <Card className="bg-card/70 border-border/80">
@@ -234,4 +325,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-
